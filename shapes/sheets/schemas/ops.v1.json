@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Operation Entry",
+  "type": "object",
+  "required": ["op", "ts", "id", "values"],
+  "properties": {
+    "op": { "enum": ["insert", "update"] },
+    "ts": { "type": "string", "format": "date-time" },
+    "id": { "type": "string", "pattern": "^r[0-9]{14}$" },
+    "values": { "type": "object" }
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "grove.v1.json",
+  "title": "Moui Grove",
+  "description": "Grove site manifest. Defines identity, theme, OG defaults, and component toggles. Deployment config lives in infrastructure/targets/.",
+  "type": "object",
+  "required": ["id", "title", "description", "lang", "og"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$",
+      "minLength": 1
+    },
+    "title": { "type": "string", "minLength": 1 },
+    "description": { "type": "string" },
+    "lang": { "type": "string", "pattern": "^[a-z]{2}(-[A-Z]{2})?$" },
+    "defaults": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "view": { "type": "string", "enum": ["grid", "list"] },
+        "layout": { "type": "string", "enum": ["article", "quote", "landing", "minimal"] },
+        "posts_per_page": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "og": {
+      "type": "object",
+      "required": ["title", "description", "image"],
+      "additionalProperties": false,
+      "properties": {
+        "title": { "type": "string", "minLength": 1 },
+        "description": { "type": "string", "minLength": 1 },
+        "image": { "type": "string", "minLength": 1 },
+        "twitter_card": {
+          "type": "string",
+          "enum": ["summary", "summary_large_image"]
+        }
+      }
+    },
+    "components": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "header": { "type": "boolean" },
+        "footer": { "type": "boolean" },
+        "sidebar": { "type": "boolean" },
+        "search": { "type": "boolean" }
+      }
+    },
+    "rss": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "max_items": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "theme": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "default": { "type": "string", "enum": ["light", "dark", "system"] },
+        "user_toggle": { "type": "boolean" }
+      }
+    },
+    "offline": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" }
+      }
+    },
+    "include_tags": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

@@ -1,0 +1,4 @@
+id: corpus-example
+flow: ./flow.yaml
+ask: ./ask.yaml
+queries: ./queries

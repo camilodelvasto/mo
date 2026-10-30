@@ -1,0 +1,19 @@
+# Leaf default theme — light, readable, minimal
+colors:
+  primary: "#1a1a2e"
+  background: "#ffffff"
+  text: "#333333"
+  accent: "#0066cc"
+  border: "#e0e0e0"
+
+typography:
+  heading: "'Georgia', serif"
+  body: "'system-ui', sans-serif"
+  mono: "'Menlo', monospace"
+  base_size: "18px"
+  line_height: 1.6
+  heading_weight: 700
+
+spacing:
+  content_width: "680px"
+  padding: "2rem"

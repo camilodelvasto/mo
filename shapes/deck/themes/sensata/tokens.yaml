@@ -1,0 +1,81 @@
+# Sensata Research theme — polling/research visual identity
+# Extracted from: audiencias_venezuela_sensata_Marzo23.pdf
+
+font-body: inter
+font-heading: fraunces
+font-mono: jetbrains-mono
+
+font-base: 1rem
+scale-sm: 0.875
+scale-md: 1
+scale-lg: 1.25
+scale-xl: 1.5
+scale-xxl: 2
+scale-display: 3.5
+
+weight-body: 400
+weight-heading: 700
+weight-label: 600
+
+leading-body: 1.6
+leading-heading: 1.1
+letter-spacing-heading: -0.02em
+
+palette:
+  white: "#ffffff"
+  light: "#f5f5f5"
+  warm: "#fbf9f7"
+  dark: "#0f0f13"
+  navy: "#1B2A4A"
+  plum: "#2D1B3D"
+  purple: "#7B2D8E"
+  magenta: "#E040FB"
+  pink: "#EC407A"
+  teal: "#2980B9"
+  muted: "#6C757D"
+
+gradients:
+  magenta-teal: "linear-gradient(90deg, #E040FB, #2980B9)"
+  plum-navy: "linear-gradient(135deg, #2D1B3D, #1B2A4A)"
+  purple-magenta: "linear-gradient(90deg, #7B2D8E, #E040FB)"
+
+borders:
+  thin: "1px solid"
+  thick: "2px solid"
+  dotted: "1px dotted"
+  dashed: "2px dashed"
+
+color-bg: white
+color-text: navy
+color-heading: navy
+color-label: magenta
+color-muted: muted
+
+space-sm: 1rem
+space-md: 2rem
+space-lg: 4rem
+space-xl: 6rem
+
+slide-width: 1280px
+slide-height: 720px
+slide-padding: "5rem 6rem"
+
+default-statement-size: xl
+
+reveal:
+  type: fade
+  stagger: true
+  speed: 0.9
+
+effects:
+  stripe:
+    colors: [magenta, pink]
+    height: 4px
+    position: bottom
+  underline:
+    colors: [magenta, teal]
+    width: 60px
+    height: 3px
+
+bar-gradient-from: purple
+bar-gradient-to: magenta

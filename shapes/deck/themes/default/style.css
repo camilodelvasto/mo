@@ -1,0 +1,186 @@
+/* Default theme — walku identity, scoped to [data-theme="default"] */
+
+/* === Typography === */
+[data-theme="default"] .heading {
+  font-family: var(--font-heading, inter), system-ui, sans-serif;
+  font-weight: var(--weight-heading, 700);
+  line-height: var(--leading-heading, 1.1);
+  font-size: calc(var(--font-base, 1rem) * 1.25);
+  letter-spacing: var(--letter-spacing-heading, normal);
+  margin-bottom: 0.5em;
+}
+
+[data-theme="default"] .subheading {
+  font-size: calc(var(--font-base, 1rem) * 1.1);
+  color: var(--palette-charcoal, #2d2d2d);
+  margin-bottom: 0.5em;
+}
+
+[data-theme="default"] .label {
+  font-weight: var(--weight-label, 500);
+  font-size: calc(var(--font-base, 1rem) * var(--scale-sm, 0.875));
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-label-resolved, var(--palette-accent, #0066cc));
+  margin-bottom: 0.75em;
+}
+
+[data-theme="default"] .body {
+  font-size: var(--font-base, 1rem);
+  line-height: var(--leading-body, 1.6);
+}
+
+[data-theme="default"] .body p { margin-bottom: 0.75em; }
+[data-theme="default"] .body p:last-child { margin-bottom: 0; }
+[data-theme="default"] .body strong { font-weight: 600; }
+
+[data-theme="default"] .body code {
+  font-family: var(--font-mono, jetbrains-mono), monospace;
+  font-size: 0.9em;
+  background: rgba(0,0,0,0.06);
+  padding: 0.15em 0.35em;
+  border-radius: 3px;
+}
+
+[data-theme="default"] .quote {
+  font-family: var(--font-heading, inter), system-ui, sans-serif;
+  font-style: italic;
+  font-size: calc(var(--font-base, 1rem) * 1.1);
+  border-left: 3px solid var(--color-label-resolved, var(--palette-accent, #0066cc));
+  padding-left: 1em;
+  margin-bottom: 0.5em;
+}
+
+[data-theme="default"] .attribution {
+  font-size: calc(var(--font-base, 1rem) * var(--scale-sm, 0.875));
+  color: var(--palette-charcoal, #2d2d2d);
+}
+
+[data-theme="default"] .caption {
+  font-size: calc(var(--font-base, 1rem) * var(--scale-sm, 0.875));
+  opacity: 0.7;
+  margin-top: 0.5em;
+}
+
+/* === Tables === */
+[data-theme="default"] .body table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9em;
+  margin: 1em 0;
+}
+
+[data-theme="default"] .body th {
+  text-align: left;
+  font-weight: 600;
+  padding: 0.5em 0.75em;
+  border-bottom: 2px solid var(--color-label-resolved, var(--palette-accent, #0066cc));
+  color: var(--color-heading-resolved, inherit);
+}
+
+[data-theme="default"] .body td {
+  padding: 0.4em 0.75em;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+
+[data-theme="default"] .body tr:last-child td {
+  border-bottom: none;
+}
+
+/* === Blockquotes === */
+[data-theme="default"] .body blockquote {
+  font-style: italic;
+  border-left: 3px solid var(--color-label-resolved, var(--palette-accent, #0066cc));
+  padding-left: 1em;
+  margin: 1em 0;
+  opacity: 0.85;
+}
+
+/* === Lists === */
+[data-theme="default"] .body ul {
+  list-style: none;
+  padding-left: 1.2em;
+  margin-bottom: 0.75em;
+}
+
+[data-theme="default"] .body ol {
+  padding-left: 1.5em;
+  margin-bottom: 0.75em;
+}
+
+[data-theme="default"] .body ul li {
+  position: relative;
+  padding-left: 0.3em;
+}
+
+[data-theme="default"] .body ul li::before {
+  content: '';
+  position: absolute;
+  left: -1em;
+  top: 0.6em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-label-resolved, var(--palette-accent, currentColor));
+}
+
+[data-theme="default"] .body li {
+  margin-bottom: 0.4em;
+  line-height: 1.5;
+}
+
+/* === Statement sizes === */
+[data-theme="default"] .size-lg .heading { font-size: calc(var(--font-base, 1rem) * 1.1); }
+[data-theme="default"] .size-xl .heading { font-size: calc(var(--font-base, 1rem) * 1.25); }
+[data-theme="default"] .size-xxl .heading { font-size: calc(var(--font-base, 1rem) * 1.5); }
+[data-theme="default"] .size-display .heading { font-size: calc(var(--font-base, 1rem) * 2); }
+
+/* === Cover layout typography === */
+[data-theme="default"] .layout-cover .heading {
+  font-size: calc(var(--font-base, 1rem) * var(--scale-display, 2.5) * 1.1);
+  margin-bottom: 0;
+}
+
+[data-theme="default"] .layout-cover .subheading {
+  font-size: calc(var(--font-base, 1rem) * var(--scale-xl, 1.6));
+  font-weight: 300;
+  margin-bottom: 0;
+}
+
+[data-theme="default"] .cover-meta {
+  display: flex;
+  gap: 24px;
+  font-size: calc(var(--font-base, 1rem) * var(--scale-sm, 0.875));
+  color: var(--palette-charcoal, #2d2d2d);
+  font-weight: 300;
+  margin-top: 16px;
+}
+
+[data-theme="default"] .layout-cover .slide-media {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+}
+
+[data-theme="default"] .layout-cover .slide-media img {
+  max-height: inherit;
+  width: auto;
+}
+
+/* === Desktop breakpoint overrides === */
+@media (min-width: 768px) {
+  [data-theme="default"] .heading {
+    font-size: calc(var(--font-base, 1rem) * var(--scale-xl, 1.5));
+  }
+  [data-theme="default"] .subheading {
+    font-size: calc(var(--font-base, 1rem) * var(--scale-lg, 1.25));
+  }
+  [data-theme="default"] .quote {
+    font-size: calc(var(--font-base, 1rem) * var(--scale-lg, 1.25));
+  }
+  [data-theme="default"] .size-lg .heading { font-size: calc(var(--font-base, 1rem) * 1.75); }
+  [data-theme="default"] .size-xl .heading { font-size: calc(var(--font-base, 1rem) * 2.5); }
+  [data-theme="default"] .size-xxl .heading { font-size: calc(var(--font-base, 1rem) * 3.5); }
+  [data-theme="default"] .size-display .heading { font-size: calc(var(--font-base, 1rem) * 5); }
+}

@@ -1,0 +1,107 @@
+#!/usr/bin/env python3
+# Copyright (C) 2026 Sensata Research GmbH
+# SPDX-License-Identifier: AGPL-3.0-only
+"""api.claude-vision.stream on the Claude CLI — the local twin of
+claude-bedrock-vision-stream. Reads the engine's MULTIMODAL envelope on stdin —
+{"system": str, "messages": [{role, content:[{type:text,text}|{type:image,
+media_type,data(b64)}]}]} — and emits the SAME NDJSON as claude-stream.
+
+`claude -p --input-format stream-json` generates once per user turn, so the
+conversation is folded into ONE user turn: prior turns rendered as text, every
+image of the conversation attached as a block, the current prompt last. The
+coupling to the CLI's input/output JSON shapes lives ONLY here. A bad envelope or
+a CLI-reported error is one {"event":"error","kind":"synthesis_failed"} and exit 1.
+
+--history-label introduces the folded prior turns. It is an ARGUMENT because the
+words belong to the corpus's language, not to a machine binding; declare nothing
+and the turns are written with no label. Every other flag is forwarded to `claude`."""
+import argparse
+import json
+import subprocess
+import sys
+
+
+def _emit(obj):
+    sys.stdout.write(json.dumps(obj, ensure_ascii=False) + "\n"); sys.stdout.flush()
+
+
+def _fold(messages: list, history_label: str | None) -> list:
+    """One stream-json user turn: [text: history + current prompt] + [image…]."""
+    parts, images = [], []
+    for m in messages[:-1]:
+        text = "".join(b["text"] for b in m["content"] if b["type"] == "text")
+        parts.append(f"{m['role']}: {text}")
+        images += [b for b in m["content"] if b["type"] == "image"]
+    current = messages[-1]
+    if current["role"] != "user":
+        raise ValueError("last message must be the user's")
+    images += [b for b in current["content"] if b["type"] == "image"]
+    prompt = "".join(b["text"] for b in current["content"] if b["type"] == "text")
+    if parts:
+        head = (history_label + "\n" if history_label else "") + "\n".join(parts) + "\n\n"
+    else:
+        head = ""
+    text = head + prompt
+    content = [{"type": "text", "text": text}] + [
+        {"type": "image", "source": {"type": "base64", "media_type": b["media_type"], "data": b["data"]}}
+        for b in images]
+    return [{"type": "user", "message": {"role": "user", "content": content}}]
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(add_help=False)
+    ap.add_argument("--history-label", default=None)
+    args, passthrough = ap.parse_known_args()      # everything else is claude's
+    raw = sys.stdin.read()
+    try:
+        env = json.loads(raw)
+        system = env["system"]
+        turns = _fold(env["messages"], args.history_label)
+    except (ValueError, KeyError, TypeError, IndexError) as exc:
+        _emit({"event": "error", "kind": "synthesis_failed", "detail": f"bad envelope: {exc}"})
+        return 1
+    cmd = ["claude", "-p", *passthrough, "--system-prompt", system,
+           "--input-format", "stream-json", "--output-format", "stream-json",
+           "--include-partial-messages", "--verbose"]
+    proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
+    proc.stdin.write("".join(json.dumps(t, ensure_ascii=False) + "\n" for t in turns).encode())
+    proc.stdin.close()
+    for raw_line in proc.stdout:
+        line = raw_line.decode(errors="replace").strip()
+        if not line:
+            continue
+        try:
+            msg = json.loads(line)
+        except json.JSONDecodeError:
+            continue                              # a non-JSON banner line — skip, never crash
+        mtype = msg.get("type")
+        if mtype == "stream_event":
+            ev = msg.get("event", {})
+            if ev.get("type") == "content_block_delta":
+                delta = ev.get("delta", {})
+                if delta.get("type") == "text_delta":
+                    _emit({"event": "token", "text": delta.get("text", "")})
+        elif mtype == "result":
+            if msg.get("is_error"):
+                _emit({"event": "error", "kind": "synthesis_failed",
+                       "detail": str(msg.get("result"))})
+                proc.wait()
+                return 1
+            usage = msg.get("usage", {})
+            _emit({"event": "done",
+                   "model": next(iter(msg.get("modelUsage", {})), None),
+                   "usage": {"input_tokens": usage.get("input_tokens"),
+                             "output_tokens": usage.get("output_tokens"),
+                             "cache_read_input_tokens": usage.get("cache_read_input_tokens")},
+                   "cost_usd": msg.get("total_cost_usd")})
+    code = proc.wait()
+    if code != 0:
+        _emit({"event": "error", "kind": "synthesis_failed",
+               "detail": proc.stderr.read().decode(errors="replace").strip() or "claude failed"})
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

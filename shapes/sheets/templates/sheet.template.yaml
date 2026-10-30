@@ -1,0 +1,77 @@
+# {{title}}
+# Created {{created}}
+
+title: {{title}}
+# port: 4300              # uncomment to fix the serve port
+
+inference:
+  default: {{inference_default}}
+
+keys:
+  view: v
+  search: /
+  toggle_hidden: H
+  open: o
+
+pipeline:
+  inputs:
+    NEW:
+      prompt: prompts/extract.md
+      op: insert
+      key: n
+      description: Create from text
+    UPDATE:
+      prompt: prompts/update.md
+      op: update
+      key: u
+      description: Smart update (LLM)
+      context:
+        row_id: required
+    LOG:
+      op: append
+      target_field: activity
+      key: l
+      description: Log entry
+      context:
+        row_id: required
+    SET:
+      bypass_inference: true
+      op: update
+      key: e
+      description: Edit cell
+      context:
+        row_id: required
+        cell: required
+
+fields:
+  id:                primary
+  created_at:        datetime
+  updated_at:        datetime
+
+  # Short form — just the type:
+  # name:            string
+  #
+  # Long form — type plus display metadata:
+  # name:
+  #   type:          string
+  #   label:         Full Name
+  #   width:         20
+  #   description:   The person's name
+
+  activity:
+    type:            log
+    label:           Activity
+
+  notes:             text
+
+  starred:
+    type:            boolean
+    label:           "★"
+    width:           3
+    key:             s
+
+  hidden:
+    type:            boolean
+    label:           "×"
+    width:           3
+    key:             x

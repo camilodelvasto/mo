@@ -1,0 +1,11 @@
+# bindings.default.yaml — the shipped keymap for the corpus TUI.
+# The navigation spine (arrows, tab, enter, esc, q, ?) is frame-owned and never
+# bound here. shift+7 (&) toggles scoped search (an app-owned affordance). A
+# per-corpus bindings.yaml may override any capability.
+bindings:
+  - { capability: lens,          key: "1", args: { lens: all },     label: all }
+  - { capability: lens,          key: "2", args: { lens: pending }, label: pending }
+  - { capability: filter,        key: "f", label: filter }      # the document Chunks filter
+  - { capability: open-artifact, key: "o", label: open }
+  - { capability: ask,           key: "a", label: ask }
+  - { capability: assert,        key: "e", label: edit }

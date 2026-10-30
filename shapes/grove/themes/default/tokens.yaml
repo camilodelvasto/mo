@@ -1,0 +1,103 @@
+# Grove default theme — moui palette (#ff1055 + #E5F20D), warm near-white
+palette:
+  primary: "#ff1055"
+  primary-dark: "#e00e49"
+  secondary: "#E5F20D"
+  secondary-dark: "#c9d300"
+  near-black: "#101010"
+  dark-gray: "#474646"
+  white: "#ffffff"
+  warm-white: "#fbfaf8"
+  code-bg: "#f3f2ef"
+  gray-100: "#f1f2f4"
+  gray-200: "#E5E7EB"
+  gray-300: "#cbd5e1"
+  gray-400: "#94a3b8"
+  gray-600: "#475569"
+  gray-800: "#1F2937"
+  black: "#0f172a"
+  banner-info-bg: "#e8f4fd"
+  banner-info-text: "#1a5276"
+  banner-info-border: "#aed6f1"
+  banner-warning-bg: "#fef9e7"
+  banner-warning-text: "#7d6608"
+  banner-warning-border: "#f9e79f"
+  banner-error-bg: "#fdedec"
+  banner-error-text: "#922b21"
+  banner-error-border: "#f5b7b1"
+  banner-success-bg: "#eafaf1"
+  banner-success-text: "#1e8449"
+  banner-success-border: "#a9dfbf"
+  chat-bubble-user: "#ffe3ec"
+  chat-bubble-assistant: "#f6f5f3"
+
+color-bg: warm-white
+color-surface: gray-100
+color-code-bg: code-bg
+color-text: gray-800
+color-text-secondary: gray-600
+color-accent: primary
+color-accent-hover: primary-dark
+color-border: gray-200
+color-card-bg: white
+color-btn-primary: near-black
+color-btn-primary-hover: dark-gray
+color-btn-primary-text: white
+color-gradient-start: primary
+color-gradient-end: secondary
+color-banner-info-bg: banner-info-bg
+color-banner-info-text: banner-info-text
+color-banner-info-border: banner-info-border
+color-banner-warning-bg: banner-warning-bg
+color-banner-warning-text: banner-warning-text
+color-banner-warning-border: banner-warning-border
+color-banner-error-bg: banner-error-bg
+color-banner-error-text: banner-error-text
+color-banner-error-border: banner-error-border
+color-banner-success-bg: banner-success-bg
+color-banner-success-text: banner-success-text
+color-banner-success-border: banner-success-border
+
+font-body: "'Avenir Next', 'Avenir', system-ui, -apple-system, sans-serif"
+font-heading: "'Avenir Next', 'Avenir', system-ui, -apple-system, sans-serif"
+font-display: "'Fraunces', Georgia, serif"
+font-reading: "'Fraunces', Georgia, serif"
+font-mono: "'SF Mono', 'Cascadia Code', 'JetBrains Mono', monospace"
+
+font-base: "16px"
+line-height: 1.7
+weight-body: 400
+weight-heading: 600
+
+leading-body: 1.7
+leading-heading: 1.2
+
+scale-sm: 0.875
+scale-md: 1
+scale-lg: 1.25
+scale-xl: 1.5
+scale-xxl: 2
+scale-display: 2.5
+
+space-xs: "0.25rem"
+space-sm: "0.5rem"
+space-md: "1rem"
+space-lg: "1.5rem"
+space-xl: "2rem"
+space-xxl: "3rem"
+space-content-width: "720px"
+space-card-padding: "1.25rem"
+space-card-radius: "16px"
+space-card-image-height: "180px"
+color-tag-bg: gray-100
+color-tag-text: gray-600
+
+# Conversation (chat feature) — bubble surfaces + reading-column layout.
+# Bubble colors resolve through the palette like every other color token, so
+# the dark theme reskins them by overriding the two palette entries above.
+color-chat-bubble-user: chat-bubble-user
+color-chat-bubble-assistant: chat-bubble-assistant
+space-chat-width: "780px"
+space-chat-bubble-max: "85%"
+space-chat-bubble-radius: "18px"
+space-chat-avatar-size: "2.25rem"

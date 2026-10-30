@@ -1,0 +1,95 @@
+# capabilities.example.yaml — copy to the 018 root as capabilities.yaml
+# (gitignored) and edit for this machine. The one place a path, port, or
+# model tag appears. A flow names a capability; this table says what
+# running it means. reads: artifact|prompt|stdin; emits: transcript|stdout|exit_code.
+# emits: transcript requires "${output}" in run: — the engine substitutes the
+# artifact path it expects and verifies the file exists after exit.
+capabilities:
+
+  local.whisper:
+    run:   [whisper-transcribe, "${input}", "${output}"]  # any wrapper that
+    reads: artifact                                       # writes the
+    emits: transcript                                     # transcript to ${output}
+
+  local.markitdown:
+    run:   [markitdown, "${input}"]
+    reads: artifact
+    emits: stdout            # markdown on stdout becomes the transcript
+
+  local.tesseract:
+    run:   [tesseract, "${input}", stdout]
+    reads: artifact
+    emits: stdout
+
+  local.anonymize:
+    run:   [anonymize, --redact]
+    reads: stdin             # transcript bytes in, redacted text out
+    emits: stdout
+
+  local.anonymize-llm:       # a local model identifies spans, the wrapper redacts
+    run:   [/abs/path/to/018-workspace/bin/anonymize-llm,
+            --model, "qwen3.5:9b", --host, "http://127.0.0.1:11434",
+            --redact, "names,contacts,ids", --segment-chars, "2500", --num-ctx, "8192", --num-predict, "1024"]
+    reads: stdin
+    emits: stdout
+    timeout: 3600
+
+  local.qwen3-9b:
+    run:     [ollama, run, "qwen3:8b"]
+    reads:   stdin             # the resolved prompt is piped to stdin
+    emits:   stdout            # stdout text is the result
+    timeout: 600               # optional — seconds; absent = unbounded
+
+  api.claude:
+    run:     [claude, -p]
+    reads:   stdin             # prompt on stdin, NOT argv — a long transcript
+    emits:   stdout            # would blow past ARG_MAX as a command-line arg
+    timeout: 600
+
+  api.claude-json:           # synthesis WITH provenance: the bin/claude-json
+    run:     [/abs/path/to/018-workspace/bin/claude-json, --model, claude-opus-4-8]
+    reads:   stdin           # wrapper runs claude --output-format json and emits
+    emits:   envelope        # {answer, model, usage, cost_usd, duration_ms}.
+    timeout: 600             # emits: envelope tells the engine to read provenance.
+
+  local.clamscan:
+    run:   [clamscan, --no-summary, "${input}"]
+    reads: artifact
+    emits: exit_code
+    map:   {"0": clean, "1": infected}
+
+  local.embed:
+    run:   [/abs/path/to/018-workspace/bin/embed, "--model", "bge-m3", "--host", "http://127.0.0.1:11434"]
+    # --host: where ollama listens on this machine
+    reads: stdin             # chunks.jsonl on stdin
+    emits: stdout            # {ref, vector, dim, model} JSONL on stdout
+
+  # The canonical form's bounds are declared HERE, not inside the shim: the longest
+  # edge, the WebP quality, and the pixel count above which an upload is refused from
+  # its header (before any decode).
+  media.image:
+    run:   [/abs/path/to/018-workspace/bin/image-canonicalize,
+            --max-edge, "2048", --quality, "82", --max-pixels, "40000000"]
+    reads: stdin             # image bytes on stdin
+    emits: stdout            # canonicalized image on stdout
+    timeout: 60
+    concurrency: 2           # decodes at once (~300 MB each); /verify refuses (503) past it
+
+  # An ask that declares attachments: binds synthesize.uses to THIS — every turn of
+  # that ask, image or not, title step included, is a multimodal envelope down
+  # stream:. `reads: envelope` DECLARES that wire shape; the engine refuses an
+  # attachments ask bound to a `reads: stdin` (prompt) capability, and a plain ask
+  # bound to an envelope reader. Local twin of the Bedrock wrapper:
+  # bin/claude-vision-stream (Claude CLI, no AWS).
+  api.claude-vision:
+    stream: [/abs/path/to/018-workspace/bin/claude-bedrock-vision-stream, --model, eu.anthropic.claude-sonnet-4-5-20250929-v1:0, --region, eu-central-1, --max-tokens, "8192"]
+    reads: envelope          # {system, messages} on stdin — not a prompt
+    emits: envelope          # {answer, model, usage, cost_usd, duration_ms}
+    timeout: 600
+
+  engine.stamp:       { builtin: true }
+  engine.chunk-ast:   { builtin: true }
+  engine.wrap-md:     { builtin: true }
+  engine.passthrough: { builtin: true }
+  engine.strip-media: { builtin: true }
+  engine.rename:      { builtin: true }

@@ -1,0 +1,71 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ask.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "version", "asks"],
+  "properties": {
+    "id": {"type": "string"},
+    "version": {"type": "integer"},
+    "flow": {"type": "string"},
+    "index": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "uses": {"type": "string"},
+        "source": {"type": "string"},
+        "fusion": {"type": "string", "enum": ["rrf"]}
+      }
+    },
+    "asks": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["id"],
+        "properties": {
+          "id": {"type": "string"},
+          "retrieve": {
+            "type": "object", "additionalProperties": false,
+            "properties": {
+              "mode": {"type": "string", "enum": ["vector", "lexical", "hybrid", "none"]},
+              "k": {"type": "integer", "minimum": 1},
+              "stitch": {"type": "integer", "minimum": 0}
+            }
+          },
+          "where": {"type": "string"},
+          "prime": {"type": "string"},
+          "sources": {"type": "boolean"},
+          "grounding": {"type": "string",
+            "description": "Optional override for the engine's default grounding directive. ${grounding} is substituted with the 0.0-1.0 value."},
+          "synthesize": {
+            "type": "object", "additionalProperties": false,
+            "required": ["uses", "prompt"],
+            "properties": {"uses": {"type": "string"}, "prompt": {"type": "string"}}
+          },
+          "check": {"type": "string", "enum": ["citations"]},
+          "condense": {
+            "type": "object", "additionalProperties": false,
+            "required": ["uses", "prompt"],
+            "properties": {"uses": {"type": "string"}, "prompt": {"type": "string"}}
+          },
+          "attachments": {
+            "type": "object", "additionalProperties": false,
+            "description": "This ask accepts uploads. Turning it on spans the ask, the box bindings and a signing secret. synthesize.uses must then name a `reads: envelope` binding.",
+            "required": ["accept"],
+            "properties": {
+              "accept": {"type": "array", "items": {"type": "string", "enum": ["image"]}, "minItems": 1},
+              "max_count": {"type": "integer", "minimum": 1},
+              "max_bytes": {"type": "integer", "minimum": 1}
+            }
+          }
+        }
+      }
+    },
+    "profiles": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object", "additionalProperties": false,
+        "required": ["system"], "properties": {"system": {"type": "string"}}
+      }
+    }
+  }
+}

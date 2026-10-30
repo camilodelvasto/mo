@@ -1,0 +1,4 @@
+/* Business theme style overrides — scoped to [data-theme="business"] */
+[data-theme="business"] .slide {
+  border-bottom: 3px solid var(--color-label-resolved);
+}

@@ -1,0 +1,44 @@
+# Deck business theme — professional, restrained
+
+font-body: inter
+font-heading: inter
+font-mono: jetbrains-mono
+
+font-base: 1rem
+scale-sm: 0.875
+scale-md: 1
+scale-lg: 1.25
+scale-xl: 1.5
+scale-xxl: 2
+scale-display: 3
+
+weight-body: 400
+weight-heading: 600
+weight-label: 500
+
+leading-body: 1.6
+leading-heading: 1.1
+
+palette:
+  dark: "#0a0a23"
+  midnight: "#0a0a23"
+  light: "#f0f0f5"
+  warm: "#fafafa"
+  accent: "#003366"
+  muted: "#6c757d"
+  white: "#ffffff"
+
+color-bg: white
+color-text: dark
+color-heading: dark
+color-label: accent
+color-muted: muted
+
+space-sm: 1rem
+space-md: 2rem
+space-lg: 4rem
+space-xl: 6rem
+
+slide-width: 1280px
+slide-height: 720px
+slide-padding: "5rem 6rem"

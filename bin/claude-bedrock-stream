@@ -1,0 +1,103 @@
+#!/usr/bin/env python3
+# Copyright (C) 2026 Sensata Research GmbH
+# SPDX-License-Identifier: AGPL-3.0-only
+"""api.claude-json.stream on Amazon Bedrock — the streaming synthesis adapter.
+Reads a prompt on stdin, calls bedrock-runtime `converse_stream`, and emits the
+SAME NDJSON as bin/claude-stream: zero+ {"event":"token","text":…} as deltas
+arrive, then {"event":"done", model, usage, cost_usd} on success; a failure or an
+empty generation becomes one {"event":"error","kind":"synthesis_failed"} + a
+non-zero exit. The engine and chat.js can't tell this from the CLI wrapper — the
+coupling to Bedrock's ConverseStream wire shape lives ONLY here, in the machine
+binding. Flags: --model <inference-profile-id> --region <aws-region> --max-tokens
+<int> (required output cap; the cost cap lives in the binding, never defaulted).
+Credentials come from the ambient AWS chain, never hardcoded. Bedrock returns no
+per-call USD cost, so cost_usd is null (AWS Budgets backstops spend)."""
+import argparse
+import json
+import sys
+
+from botocore.config import Config
+
+
+def _emit(obj):
+    sys.stdout.write(json.dumps(obj, ensure_ascii=False) + "\n")
+    sys.stdout.flush()
+
+
+# In-stream Bedrock error events (a stream can end with one instead of raising).
+_ERROR_EVENTS = ("modelStreamErrorException", "internalServerException",
+                 "throttlingException", "validationException",
+                 "serviceUnavailableException")
+
+
+def token_events(stream):
+    """Decode a Bedrock ConverseStream into (kind, payload) tuples: ('token', text),
+    ('usage', usage_dict). Raises RuntimeError on an in-stream error event. Deltas
+    with no text (tool/reasoning blocks — not used by this text-only ask) are skipped."""
+    for ev in stream:
+        for name in _ERROR_EVENTS:
+            if name in ev:
+                raise RuntimeError(f"{name}: {ev[name]}")
+        if "contentBlockDelta" in ev:
+            text = ev["contentBlockDelta"].get("delta", {}).get("text")
+            if text:
+                yield ("token", text)
+        elif "metadata" in ev:
+            yield ("usage", ev["metadata"].get("usage", {}))
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--model", required=True)
+    ap.add_argument("--region", required=True)
+    ap.add_argument("--max-tokens", type=int, required=True)
+    args = ap.parse_args()
+
+    prompt = sys.stdin.read()
+    if not prompt.strip():
+        sys.stderr.write("claude-bedrock-stream: empty prompt on stdin\n")
+        return 1
+
+    import boto3
+    # Adaptive retry: back off + client-side throttle on Bedrock ThrottlingException so a
+    # momentary throttle is retried, not surfaced as a lost turn. The cost cap already
+    # lives in --max-tokens; this bounds transient failures.
+    client = boto3.client("bedrock-runtime", region_name=args.region,
+                          config=Config(retries={"max_attempts": 4, "mode": "adaptive"}))
+    try:
+        resp = client.converse_stream(
+            modelId=args.model,
+            messages=[{"role": "user", "content": [{"text": prompt}]}],
+            inferenceConfig={"maxTokens": args.max_tokens})
+    except Exception as exc:
+        _emit({"event": "error", "kind": "synthesis_failed", "detail": str(exc)})
+        return 2
+
+    saw_token = False
+    usage = {}
+    try:
+        for kind, payload in token_events(resp["stream"]):
+            if kind == "token":
+                saw_token = True
+                _emit({"event": "token", "text": payload})
+            elif kind == "usage":
+                usage = payload or {}
+    except Exception as exc:
+        _emit({"event": "error", "kind": "synthesis_failed", "detail": str(exc)})
+        return 2
+
+    if not saw_token:                       # empty generation is a failure, never a fallback
+        _emit({"event": "error", "kind": "synthesis_failed",
+               "detail": "empty generation (no tokens from Bedrock)"})
+        return 3
+
+    _emit({"event": "done", "model": args.model,
+           "usage": {"input_tokens": usage.get("inputTokens"),
+                     "output_tokens": usage.get("outputTokens"),
+                     "cache_read_input_tokens": usage.get("cacheReadInputTokens")},
+           "cost_usd": None})
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

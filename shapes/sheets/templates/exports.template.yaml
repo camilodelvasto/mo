@@ -1,0 +1,7 @@
+# Export configurations for {{title}}
+# Run: mo sheets export <sheet> <name>
+
+exports:
+  local:
+    formats: [csv, xlsx]
+    # fields: [field1, field2]    # omit for all fields

@@ -1,0 +1,36 @@
+# Grove dark theme — color overrides only. Inherits everything else from default.
+palette:
+  primary: "#ff3a70"
+  primary-dark: "#ff1055"
+  near-black: "#101010"
+  dark-gray: "#474646"
+  warm-white: "#1a1a1a"
+  code-bg: "#242429"
+  gray-100: "#1a1a22"
+  gray-200: "#2a2a35"
+  gray-300: "#3a3a48"
+  gray-400: "#666680"
+  gray-600: "#999999"
+  gray-800: "#e0e0e0"
+  black: "#0f172a"
+  banner-info-bg: "#162a3f"
+  banner-info-text: "#8ec5ff"
+  banner-info-border: "#2e4a6a"
+  banner-warning-bg: "#3a3215"
+  banner-warning-text: "#f0d570"
+  banner-warning-border: "#6a5a20"
+  banner-error-bg: "#3a1f1f"
+  banner-error-text: "#f5a29a"
+  banner-error-border: "#6e3838"
+  banner-success-bg: "#18362a"
+  banner-success-text: "#8fd9b0"
+  banner-success-border: "#2f5a43"
+  chat-bubble-user: "#3a2230"
+  chat-bubble-assistant: "#23232c"
+
+color-card-bg: gray-300
+color-btn-primary: white
+color-btn-primary-hover: gray-600
+color-btn-primary-text: near-black
+color-tag-bg: gray-400
+color-tag-text: gray-800

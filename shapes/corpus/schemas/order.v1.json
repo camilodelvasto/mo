@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "order.v1.json",
+  "title": "Moui Corpus Order File",
+  "description": "The inbox's second input type, beside asserts. A closed action list so the inbox cannot drift into a command bus. Both actions are in the enum from day one — the contract is closed, not grown later. `reprocess` validates here but the engine refuses to execute it until a later step; that refusal is an explicit 'not yet implemented', never an 'unknown action'.",
+  "type": "object",
+  "required": ["doc_id", "by", "action"],
+  "additionalProperties": false,
+  "properties": {
+    "doc_id": { "type": "string", "pattern": "^[0-9a-f]{12}$" },
+    "by": { "type": "string", "enum": ["operator"] },
+    "action": { "type": "string", "enum": ["reprocess", "retire"] },
+    "from": { "type": "string", "description": "reprocess only: the stage to re-run from; must name a stage in the document's own entry list (validated when reprocess lands)." }
+  }
+}

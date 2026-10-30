@@ -1,0 +1,575 @@
+/* style.css — light theme, matching moui design language (012, 016) */
+
+:root {
+  --bg: #fbfaf8;
+  --surface: #ffffff;
+  --surface-alt: #f5f4f2;
+  --text: #1a1a1a;
+  --text-secondary: #6b6b6b;
+  --text-muted: #a0a0a0;
+  --border: #e5e5e3;
+  --border-hover: #d0d0cc;
+  --header-bg: #f7f7f5;
+  --row-hover: #f0efed;
+  --row-selected: #eef4ff;
+  --accent: #1a1a1a;
+  --accent-hover: #333;
+  --focus: #4a90d9;
+  --danger: #ef4444;
+  --success: #22c55e;
+  --font: "Avenir Next", "Avenir", system-ui, -apple-system, sans-serif;
+  --font-mono: "SF Mono", "Cascadia Code", "JetBrains Mono", ui-monospace, monospace;
+  --size-xs: 11px;
+  --size-sm: 13px;
+  --size-base: 14px;
+  --size-lg: 16px;
+  --radius: 4px;
+  --radius-lg: 6px;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: var(--size-base);
+  line-height: 1.5;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+h1 {
+  margin: 0;
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--size-lg);
+  font-weight: 600;
+  color: var(--text);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+#table {
+  flex: 1;
+  overflow: hidden;
+}
+
+/* --- Tabulator overrides --- */
+
+.tabulator {
+  background: var(--surface);
+  border: none;
+  border-radius: 0;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: var(--size-base);
+}
+
+.tabulator .tabulator-header {
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.tabulator .tabulator-header .tabulator-col {
+  background: var(--header-bg);
+  border-right: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: var(--size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tabulator .tabulator-header .tabulator-col:hover {
+  background: var(--surface-alt);
+}
+
+.tabulator .tabulator-tableholder {
+  background: var(--surface);
+}
+
+.tabulator-row {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+
+.tabulator-row:nth-child(even) {
+  background: var(--bg);
+}
+
+.tabulator-row:hover,
+.tabulator-row.tabulator-row-even:hover {
+  background: var(--row-hover);
+}
+
+.tabulator-row.tabulator-selected,
+.tabulator-row.tabulator-selected:hover {
+  background: var(--row-selected);
+}
+
+.tabulator-row.row-dimmed {
+  opacity: 0.35;
+}
+
+.tabulator-cell {
+  border-right: 1px solid var(--border);
+  padding: var(--space-xs) var(--space-sm);
+  color: var(--text);
+  max-width: 30vw;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.tabulator-cell.tabulator-editing {
+  background: var(--surface);
+  border: 2px solid var(--focus);
+  color: var(--text);
+  padding: 2px 6px;
+}
+
+.tabulator-cell.tabulator-editing input,
+.tabulator-cell.tabulator-editing select,
+.tabulator-cell.tabulator-editing textarea {
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: var(--size-base);
+  outline: none;
+  width: 100%;
+}
+
+.tabulator-cell.inference-field {
+  cursor: default;
+  color: var(--text-muted);
+}
+
+.tabulator-cell.inference-field:not(:empty) {
+  color: var(--text-secondary);
+}
+
+/* Tick/cross formatter for booleans */
+.tabulator-cell svg.tabulator-tick,
+.tabulator-cell svg.tabulator-cross {
+  vertical-align: middle;
+}
+
+/* Scrollbar */
+
+.tabulator .tabulator-tableholder::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.tabulator .tabulator-tableholder::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+.tabulator .tabulator-tableholder::-webkit-scrollbar-thumb {
+  background: var(--border-hover);
+  border-radius: 3px;
+}
+
+/* --- Status bar --- */
+
+#status-bar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-xs) var(--space-md);
+  background: var(--header-bg);
+  border-top: 1px solid var(--border);
+  font-size: var(--size-xs);
+  color: var(--text-muted);
+  height: 28px;
+  font-family: var(--font-mono);
+}
+
+/* --- Dialog (detail modal + ingest modal) --- */
+
+dialog {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: var(--size-base);
+  max-width: 720px;
+  max-height: 85vh;
+  width: 90vw;
+  padding: 0;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+dialog header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 1px solid var(--border);
+  font-weight: 600;
+  font-size: var(--size-lg);
+}
+
+dialog header button.close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+  padding: 4px;
+  border-radius: var(--radius);
+  transition: color 150ms, background 150ms;
+}
+
+dialog header button.close:hover {
+  color: var(--text);
+  background: var(--surface-alt);
+}
+
+dialog .dialog-body {
+  overflow-y: auto;
+  padding: var(--space-lg);
+  max-height: calc(85vh - 130px);
+}
+
+dialog section {
+  margin-bottom: var(--space-lg);
+}
+
+dialog section:last-child {
+  margin-bottom: 0;
+}
+
+dialog section h3 {
+  font-size: var(--size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin: 0 0 var(--space-sm) 0;
+  padding-bottom: var(--space-xs);
+  border-bottom: 1px solid var(--border);
+}
+
+dialog .field-row {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: var(--space-sm);
+  align-items: start;
+  padding: var(--space-xs) 0;
+  min-height: 32px;
+}
+
+dialog .field-label {
+  font-size: var(--size-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+  padding-top: 5px;
+  text-align: right;
+}
+
+dialog .field-value {
+  color: var(--text);
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+}
+
+dialog .field-value .readonly {
+  color: var(--text-secondary);
+}
+
+dialog input,
+dialog select,
+dialog textarea {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: var(--size-base);
+  padding: 6px 10px;
+  width: 100%;
+  outline: none;
+  transition: border-color 150ms;
+}
+
+dialog input:focus,
+dialog select:focus,
+dialog textarea:focus {
+  border-color: var(--focus);
+  box-shadow: 0 0 0 2px rgba(74, 144, 217, 0.15);
+}
+
+dialog textarea {
+  min-height: 60px;
+  max-height: 150px;
+  resize: vertical;
+  line-height: 1.5;
+  font-family: var(--font-mono);
+  font-size: var(--size-sm);
+}
+
+dialog footer {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: flex-end;
+  padding: var(--space-md) var(--space-lg);
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+}
+
+dialog button {
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius);
+  color: #fff;
+  cursor: pointer;
+  font-family: var(--font);
+  font-size: var(--size-sm);
+  font-weight: 600;
+  padding: 6px 16px;
+  transition: background 150ms;
+}
+
+dialog button:hover {
+  background: var(--accent-hover);
+}
+
+dialog button:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+dialog button.secondary {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+dialog button.secondary:hover {
+  border-color: var(--border-hover);
+  color: var(--text);
+  background: var(--surface-alt);
+}
+
+/* --- Search modal --- */
+
+.search-active {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  margin-bottom: var(--space-sm);
+  background: var(--surface-alt);
+  border-radius: var(--radius);
+  font-size: var(--size-sm);
+  color: var(--text-secondary);
+}
+
+.search-clear {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: var(--size-xs);
+  padding: 2px 8px;
+  margin-left: auto;
+}
+
+.search-clear:hover {
+  border-color: var(--border-hover);
+  color: var(--text);
+}
+
+/* --- Log field --- */
+
+.log-field-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  width: 100%;
+}
+
+.log-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+}
+
+.log-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-xs) 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.log-entry:last-child {
+  border-bottom: none;
+}
+
+.log-entry .log-ts {
+  font-size: var(--size-xs);
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+.log-entry .log-text {
+  font-size: var(--size-sm);
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* --- Cell focus (keyboard navigation) --- */
+
+.tabulator-cell.cell-focused {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+  z-index: 1;
+  position: relative;
+}
+
+.tabulator-row.row-active {
+  background: var(--row-selected);
+}
+
+/* --- Toggle switch (booleans) --- */
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  width: 32px;
+  height: 18px;
+  background: var(--border-hover);
+  border-radius: 9px;
+  padding: 2px;
+  cursor: pointer;
+  transition: background 150ms;
+  vertical-align: middle;
+}
+
+.toggle.on {
+  background: var(--success, #22c55e);
+}
+
+.toggle-knob {
+  display: block;
+  width: 14px;
+  height: 14px;
+  background: var(--surface);
+  border-radius: 50%;
+  transition: transform 150ms;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+}
+
+.toggle.on .toggle-knob {
+  transform: translateX(14px);
+}
+
+/* Modal toggle (with label and checkbox) */
+
+.toggle-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.toggle-label input[type="checkbox"] {
+  display: none;
+}
+
+.toggle-label .toggle {
+  width: 36px;
+  height: 20px;
+  border-radius: 10px;
+  padding: 2px;
+}
+
+.toggle-label .toggle-knob {
+  width: 16px;
+  height: 16px;
+}
+
+.toggle-label input:checked + .toggle {
+  background: var(--success, #22c55e);
+}
+
+.toggle-label input:checked + .toggle .toggle-knob {
+  transform: translateX(16px);
+}
+
+.toggle-text {
+  font-size: var(--size-sm);
+  color: var(--text-secondary);
+}
+
+/* --- Wrap text cells --- */
+
+.tabulator-cell .tabulator-cell-wrap {
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* --- Tabulator editor dropdowns --- */
+
+.tabulator-popup-container {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.tabulator-edit-list {
+  background: var(--surface);
+}
+
+.tabulator-edit-list .tabulator-edit-list-item {
+  color: var(--text);
+  padding: 6px 12px;
+  font-size: var(--size-base);
+}
+
+.tabulator-edit-list .tabulator-edit-list-item:hover,
+.tabulator-edit-list .tabulator-edit-list-item.active {
+  background: var(--focus);
+  color: #ffffff;
+}
+
+.tabulator-edit-list .tabulator-edit-list-item.focused {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}

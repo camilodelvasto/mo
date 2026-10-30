@@ -1,0 +1,41 @@
+/* The corpus catalogue look: charcoal ground, four semantic accents (status is
+   data; never reuse them for chrome), three text weights. The ~/◌ encodings are
+   NOT here — they are glyph+weight in render.py's cell text, so they survive with
+   colour off; this stylesheet only reinforces with colour. */
+Screen { background: #16171a; color: #c8c9cc; }
+#header-line { height: 1; color: #76777b; padding: 0 1; }
+#footer-line { height: 1; color: #76777b; padding: 0 1; dock: bottom; }
+#body { height: 1fr; }
+#nav-rail { width: 24; border-right: tall #2a2b2f; padding: 1; }
+#facet-tree { height: auto; }
+/* the focused facet line a subtle background block; bright labels, dim guides */
+#facet-tree > .tree--highlight-line { background: #23252b; }
+#facet-tree > .tree--label { color: #c8c9cc; }
+#facet-tree > .tree--guides { color: #2a2b2f; }
+#chat-slot { color: #4a4b4f; border: round #2a2b2f; margin-top: 2; }
+#main { width: 1fr; padding: 0 1; }
+/* The search line is always a reserved 1-row strip (no border) so toggling it
+   never reflows the table — hidden when closed, shown on "/". */
+#search-bar { height: 1; border: none; padding: 0 1; background: #1b1d21;
+              color: #c8c9cc; visibility: hidden; }
+#search-bar.open { visibility: visible; }
+#inspector { width: 40; border-left: tall #2a2b2f; padding: 1; color: #76777b; }
+#table { height: 1fr; }
+/* the row cursor stays a visible block even when the table is blurred (e.g. while
+   the search line holds focus) so you always see which row is current. */
+#table > .datatable--cursor { background: #2d3340; color: #ffffff; }
+/* the four status accents, applied by render.py markup, named here for reference:
+   complete #4cb782 · parked #e0a458 · failed #d4655a · live/in-flight #8fb4e3 */
+
+/* document screen: the active tab + count in the blue accent; the chunk
+   highlight as a subtle background block. The chunk-pane WIDTHS are owned by
+   DocumentScreen's own CSS (a fixed list width keeps it crash-safe standalone);
+   app.tcss only layers the chrome — border, padding, accent — so each width has
+   exactly one source. */
+#tab-list > .option-list--option-highlighted { color: #8fb4e3; }
+#chunk-list > .option-list--option-highlighted { color: #8fb4e3; }
+#chunk-panes { height: 1fr; }
+#chunk-filter { height: 1; }
+#chunk-list { border-right: tall #2a2b2f; }
+#transcript-view { padding: 0 1; }
+#tab-title, #flow-label { color: #76777b; }

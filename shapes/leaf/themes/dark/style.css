@@ -1,0 +1,7 @@
+/* NOTE: CSS custom properties in this file use leaf's token naming convention.
+   They will resolve once the leaf renderer wires applyCSSVariables.
+   Variable names will be audited and aligned at that time. */
+
+[data-theme="dark"] {
+  /* Dark theme uses same structure as default — tokens handle the difference */
+}

@@ -1,0 +1,30 @@
+id: fixture-ask
+version: 1
+flow: ./flow.yaml
+asks:
+  - id: chat
+    retrieve:
+      mode: lexical
+      k: 5
+    prime: grounded
+    synthesize:
+      uses: api.claude
+      prompt: |
+        You are a precise assistant. You answer ONLY from the passages provided.
+        For every claim you make, you MUST cite the source using the exact marker format [doc_id:ref] — where doc_id is the 12-character hex identifier and ref is the chunk reference shown in each passage.
+        Do not invent citations. Do not cite a passage you did not read. Every sentence that draws on a passage must end with its marker.
+
+        Passages:
+        ${retrieved}
+
+        Question: ${question}
+
+        Answer in the same language as the question. Cite every claim with [doc_id:ref].
+    check: citations
+  - id: search
+    retrieve:
+      mode: lexical
+      k: 8
+profiles:
+  grounded:
+    system: You are precise and do not speculate. You answer only from the provided sources and cite each claim.

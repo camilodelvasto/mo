@@ -1,0 +1,6 @@
+id: getting-started
+title: "Getting Started"
+description: "From install to first publish."
+posts:
+  - welcome
+layout: list

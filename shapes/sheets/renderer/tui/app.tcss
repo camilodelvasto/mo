@@ -1,0 +1,151 @@
+Screen {
+    background: #000000;
+}
+
+Header {
+    background: #005f5f;
+    color: #ffffff;
+}
+
+DataTable {
+    height: 1fr;
+    background: #000000;
+    background-tint: transparent;
+    color: #e8e8e8;
+
+    &:focus {
+        background-tint: transparent;
+    }
+
+    &:dark > .datatable--even-row {
+        background: #000000;
+    }
+
+    & > .datatable--header {
+        background: #1c1c1c;
+        color: #00d4aa;
+        text-style: bold;
+    }
+
+    &:focus > .datatable--cursor {
+        background: #005f5f;
+        color: #ffffff;
+        text-style: bold;
+    }
+
+    & > .datatable--cursor {
+        background: #1a3a3a;
+        color: #ffffff;
+    }
+
+    & > .datatable--even-row {
+        background: #000000;
+        color: #cccccc;
+    }
+
+    & > .datatable--odd-row {
+        background: #080808;
+        color: #cccccc;
+    }
+
+    &:focus > .datatable--header {
+        background: #1c1c1c;
+        color: #00d4aa;
+    }
+}
+
+Footer {
+    background: #1c1c1c;
+}
+
+#status {
+    dock: bottom;
+    height: 1;
+    background: #1c1c1c;
+    color: #888888;
+    padding: 0 1;
+}
+
+#status.has-errors {
+    background: #3a1010;
+    color: #ff6666;
+}
+
+#action-modal {
+    align: center middle;
+    width: 80%;
+    max-width: 100;
+    height: auto;
+    max-height: 20;
+    background: #1c1c1c;
+    border: tall #005f5f;
+    padding: 1 2;
+}
+
+#action-modal Label {
+    color: #00d4aa;
+    margin-bottom: 1;
+}
+
+#action-modal Input, #action-modal TextArea {
+    background: #000000;
+    color: #e8e8e8;
+    border: tall #333333;
+}
+
+#action-modal Input:focus, #action-modal TextArea:focus {
+    border: tall #005f5f;
+}
+
+#help-screen {
+    align: center middle;
+    width: 60;
+    height: auto;
+    max-height: 24;
+    background: #1c1c1c;
+    border: tall #005f5f;
+    padding: 1 2;
+}
+
+#help-screen Static {
+    color: #e8e8e8;
+}
+
+#detail-view {
+    background: #000000;
+    padding: 1 0;
+}
+
+#detail-title {
+    color: #00d4aa;
+    text-style: bold;
+    padding: 0 0 1 0;
+}
+
+.section-header {
+    color: #005f5f;
+    text-style: bold;
+}
+
+.detail-field {
+    color: #cccccc;
+    padding: 0;
+}
+
+.detail-cursor {
+    background: #1a3a3a;
+    color: #ffffff;
+}
+
+.detail-notes {
+    color: #aaaaaa;
+    padding: 0 0 0 2;
+}
+
+#detail-status {
+    dock: bottom;
+    height: 1;
+    background: #1c1c1c;
+    color: #888888;
+    padding: 0 1;
+}

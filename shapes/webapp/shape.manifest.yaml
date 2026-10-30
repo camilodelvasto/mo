@@ -1,0 +1,27 @@
+name: webapp
+version: 0.1.0
+type: renderer
+description: Any source folder that builds itself into a static web app. The folder declares its build; the shape runs it and hands the output to deploy.
+
+capabilities:
+  build:
+    - format: static
+      adapter: exporters/build.py
+
+schemas:
+  extends: [bite.v1.json]
+  defines: [webapp.v1.json]
+  deposits_to: content/schema/
+
+permissions:
+  filesystem:
+    read: [content/]
+    write: [content/]
+  network: none
+  subprocess: restricted
+
+dependencies:
+  python:
+    core:
+      - pyyaml>=6.0
+      - jsonschema>=4.0

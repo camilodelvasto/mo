@@ -1,0 +1,107 @@
+#!/usr/bin/env python3
+# Copyright (C) 2026 Sensata Research GmbH
+# SPDX-License-Identifier: AGPL-3.0-only
+"""api.claude-vision.stream on Amazon Bedrock. Reads a MULTIMODAL envelope on stdin
+— {"system": str, "messages": [{role, content:[{type:text,text}|{type:image,
+media_type,data(b64)}]}]} — maps it to Bedrock Converse (image → {"image":{"format",
+"source":{"bytes"}}}), and emits the SAME NDJSON as claude-bedrock-stream. The
+coupling to Bedrock's multimodal wire shape lives ONLY here. Empty generation is a
+failure, never a fallback."""
+import argparse
+import base64
+import json
+import sys
+
+from botocore.config import Config
+
+_ERROR_EVENTS = ("modelStreamErrorException", "internalServerException",
+                 "throttlingException", "validationException",
+                 "serviceUnavailableException")
+_FORMATS = {"image/webp": "webp", "image/jpeg": "jpeg", "image/png": "png", "image/gif": "gif"}
+
+
+def _emit(obj):
+    sys.stdout.write(json.dumps(obj, ensure_ascii=False) + "\n"); sys.stdout.flush()
+
+
+def _to_bedrock_content(block: dict) -> dict:
+    if block["type"] == "text":
+        return {"text": block["text"]}
+    fmt = _FORMATS.get(block["media_type"])
+    if fmt is None:
+        raise ValueError(f"unsupported image media_type: {block['media_type']!r}")
+    return {"image": {"format": fmt, "source": {"bytes": base64.b64decode(block["data"])}}}
+
+
+def _to_bedrock_messages(messages: list) -> list:
+    return [{"role": m["role"], "content": [_to_bedrock_content(b) for b in m["content"]]}
+            for m in messages]
+
+
+def token_events(stream):
+    for ev in stream:
+        for name in _ERROR_EVENTS:
+            if name in ev:
+                raise RuntimeError(f"{name}: {ev[name]}")
+        if "contentBlockDelta" in ev:
+            text = ev["contentBlockDelta"].get("delta", {}).get("text")
+            if text:
+                yield ("token", text)
+        elif "metadata" in ev:
+            yield ("usage", ev["metadata"].get("usage", {}))
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--model", required=True)
+    ap.add_argument("--region", required=True)
+    ap.add_argument("--max-tokens", type=int, required=True)
+    args = ap.parse_args()
+
+    raw = sys.stdin.read()
+    if not raw.strip():
+        sys.stderr.write("claude-bedrock-vision-stream: empty envelope on stdin\n")
+        return 1
+    try:
+        env = json.loads(raw)
+        messages = _to_bedrock_messages(env["messages"])
+        system = [{"text": env["system"]}]
+    except (ValueError, KeyError) as exc:
+        _emit({"event": "error", "kind": "synthesis_failed", "detail": f"bad envelope: {exc}"})
+        return 2
+
+    import boto3
+    client = boto3.client("bedrock-runtime", region_name=args.region,
+                          config=Config(retries={"max_attempts": 4, "mode": "adaptive"}))
+    try:
+        resp = client.converse_stream(modelId=args.model, system=system, messages=messages,
+                                      inferenceConfig={"maxTokens": args.max_tokens})
+    except Exception as exc:
+        _emit({"event": "error", "kind": "synthesis_failed", "detail": str(exc)})
+        return 2
+
+    saw_token, usage = False, {}
+    try:
+        for kind, payload in token_events(resp["stream"]):
+            if kind == "token":
+                saw_token = True; _emit({"event": "token", "text": payload})
+            elif kind == "usage":
+                usage = payload or {}
+    except Exception as exc:
+        _emit({"event": "error", "kind": "synthesis_failed", "detail": str(exc)})
+        return 2
+
+    if not saw_token:
+        _emit({"event": "error", "kind": "synthesis_failed",
+               "detail": "empty generation (no tokens from Bedrock)"})
+        return 3
+    _emit({"event": "done", "model": args.model,
+           "usage": {"input_tokens": usage.get("inputTokens"),
+                     "output_tokens": usage.get("outputTokens"),
+                     "cache_read_input_tokens": usage.get("cacheReadInputTokens")},
+           "cost_usd": None})
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -1,0 +1,40 @@
+id: grove-preview
+title: "Grove preview"
+description: "Demonstrates composed pages, authored elements, and the chat feature."
+lang: en
+
+defaults:
+  view: grid
+  layout: article
+  posts_per_page: 12
+
+og:
+  title: "Grove preview"
+  description: "Demonstrates composed pages, authored elements, and the chat feature."
+  image: assets/og-default.png
+
+components:
+  header: true
+  footer: true
+  sidebar: false
+  search: true
+
+rss:
+  enabled: true
+  max_items: 20
+
+theme:
+  default: system
+  user_toggle: true
+
+offline:
+  enabled: true
+
+features:
+  - id: chatbotX
+    type: chat
+    ask: faq
+
+pages:
+  "/landing": pages/landing
+  "/chatbot": pages/chatbot

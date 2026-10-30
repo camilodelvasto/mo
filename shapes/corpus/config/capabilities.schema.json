@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "capabilities.v1.json",
+  "title": "Moui Machine Capability Bindings",
+  "type": "object",
+  "required": ["capabilities"],
+  "additionalProperties": false,
+  "properties": {
+    "capabilities": {
+      "type": "object",
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": ["builtin"],
+            "additionalProperties": false,
+            "properties": { "builtin": { "type": "boolean", "const": true } }
+          },
+          {
+            "type": "object",
+            "required": ["run", "reads", "emits"],
+            "additionalProperties": false,
+            "properties": {
+              "run": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+              "reads": { "type": "string", "enum": ["artifact", "prompt", "stdin"] },
+              "emits": { "type": "string", "enum": ["transcript", "stdout", "exit_code", "envelope"] },
+              "map": {
+                "type": "object",
+                "additionalProperties": { "type": "string" },
+                "description": "exit_code only: translate codes to the stage's enum value."
+              },
+              "timeout": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "description": "Seconds this capability may run; absent = unbounded. TimeoutExpired fails the stage."
+              }
+            },
+            "if": { "properties": { "emits": { "const": "exit_code" } }, "required": ["emits"] },
+            "else": { "not": { "required": ["map"] } }
+          }
+        ]
+      }
+    }
+  }
+}

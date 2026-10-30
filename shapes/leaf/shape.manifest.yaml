@@ -1,0 +1,27 @@
+name: leaf
+version: 1.0.0
+type: renderer
+description: Web renderer for posts and pages. Serves Markdown content with theme support.
+
+capabilities:
+  render:
+    - type: post
+
+schemas:
+  extends: [bite.v1.json]
+  defines: [post.v1.json]
+  deposits_to: content/schema/
+
+themes:
+  shape_themes: themes/
+
+permissions:
+  filesystem:
+    read: [content/]
+    write: [shapes/leaf/.rendered/]
+  network: none
+  subprocess: none
+
+state_dir: .corpus/shapes/leaf/
+
+sample: preview/post-example.md

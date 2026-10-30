@@ -1,0 +1,204 @@
+#!/usr/bin/env python3
+# Copyright (C) 2026 Sensata Research GmbH
+# SPDX-License-Identifier: AGPL-3.0-only
+"""Redact personal data from a transcript with a local model that only
+IDENTIFIES — the code redacts. Transcript on stdin, redacted transcript on
+stdout. Fully local: one ollama host, named on argv.
+
+Why the split: a model that rewrites text paraphrases, drops lines, and cannot
+be verified. A model that lists the exact substrings to remove can be checked
+(every span must occur in the text) and the replacement is deterministic.
+Spans are collected over the whole document and replaced everywhere, so a name
+the model named in one segment is gone from every segment, including the ones
+where it was missed. Matching is case-insensitive and treats `_` as a word
+separator, so a filename pasted as a title (ENTREVISTA_JUAN_PEREZ) falls too.
+
+Segments are newline-aligned and bounded by --segment-chars so a long
+transcript never exceeds the model's context. --num-predict caps the answer:
+a model at temperature 0 can loop on a list until the context is full
+(measured: 14,641 tokens, 15 minutes, for one 6000-char segment). An answer
+that hits the cap is not parsed; the segment is split at its middle line
+break and each half is asked on its own, down to a floor, where it fails.
+Any failure — host down, model missing, non-JSON answer, a span that is not
+in the text, a segment below the floor still looping — exits 1: the stage
+fails closed.
+
+    anonymize-llm --model qwen3.5:9b --host http://127.0.0.1:11434 \
+                  --redact names,contacts,ids --segment-chars 2500 \
+                  --num-ctx 8192 --num-predict 1024
+"""
+import argparse
+import json
+import re
+import sys
+import urllib.error
+import urllib.request
+
+KINDS = {
+    "names":    ("[NOMBRE]",
+                 "personal names of people in any form: full names, first names alone, "
+                 "surnames alone, nicknames, diminutives, initials used as names, usernames, "
+                 "names inside titles, headings, filenames or joined with underscores, "
+                 "names in UPPERCASE or lowercase"),
+    "contacts": ("[CONTACTO]",
+                 "email addresses, phone numbers, social media handles, personal URLs"),
+    "ids":      ("[DOCUMENTO]",
+                 "identity document numbers, tax ids, account numbers, license plates, "
+                 "any number that identifies one person"),
+    "places":   ("[LUGAR]",
+                 "street addresses, neighborhoods, buildings, towns and cities, "
+                 "any location precise enough to find a person"),
+    "orgs":     ("[ORGANIZACIÓN]",
+                 "employers, schools, companies, and other organizations a person belongs to"),
+}
+
+_SCHEMA = {
+    "type": "object",
+    "required": ["spans"],
+    "properties": {
+        "spans": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": ["text", "kind"],
+                "properties": {
+                    "text": {"type": "string"},
+                    "kind": {"type": "string"},
+                },
+            },
+        }
+    },
+}
+
+
+def _args():
+    p = argparse.ArgumentParser()
+    p.add_argument("--model", required=True)
+    p.add_argument("--host", required=True)
+    p.add_argument("--redact", required=True,
+                   help="comma-separated kinds: " + ",".join(KINDS))
+    p.add_argument("--segment-chars", required=True, type=int)
+    p.add_argument("--num-ctx", required=True, type=int,
+                   help="model context in tokens; must hold a segment plus the answer")
+    p.add_argument("--num-predict", required=True, type=int,
+                   help="answer cap in tokens; an answer that hits it bisects the segment")
+    a = p.parse_args()
+    a.kinds = [k.strip() for k in a.redact.split(",") if k.strip()]
+    unknown = [k for k in a.kinds if k not in KINDS]
+    if unknown or not a.kinds:
+        sys.exit(f"--redact: unknown kind {unknown} (known: {', '.join(KINDS)})")
+    return a
+
+
+def _segments(text: str, cap: int):
+    i, n = 0, len(text)
+    while i < n:
+        end = min(i + cap, n)
+        if end < n:
+            nl = text.rfind("\n", i, end)
+            if nl > i:
+                end = nl + 1
+        yield text[i:end]
+        i = end
+
+
+def _prompt(kinds: list[str], segment: str) -> str:
+    rules = "\n".join(f"- {k}: {KINDS[k][1]}" for k in kinds)
+    return (
+        "You are anonymizing a transcript. Find every piece of text in the "
+        "segment below that identifies a person. Report each one as an exact "
+        "substring, copied verbatim from the segment, character for character, "
+        "with its kind. Report every distinct form you see; a person named in "
+        "three different ways is three spans. Report each distinct string exactly "
+        "once, however many times it occurs. Report nothing that is not in the "
+        "segment. Placeholders already in square brackets are done; skip them. "
+        "Report only these kinds:\n"
+        f"{rules}\n\n"
+        "Segment:\n"
+        f"{segment}"
+    )
+
+
+_FLOOR = 200     # chars: a segment this small that still loops is the model's fault
+
+
+def _ask(a, prompt: str) -> tuple[str, str]:
+    """(content, done_reason) — done_reason is 'stop' or 'length'."""
+    body = json.dumps({
+        "model": a.model,
+        "messages": [{"role": "user", "content": prompt}],
+        "stream": False,
+        "think": False,
+        "format": _SCHEMA,
+        "options": {"temperature": 0, "num_ctx": a.num_ctx, "num_predict": a.num_predict},
+    }).encode()
+    req = urllib.request.Request(f"{a.host}/api/chat", data=body,
+                                 headers={"Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=1800) as resp:
+            answer = json.load(resp)
+    except urllib.error.URLError as exc:
+        sys.exit(f"ollama at {a.host}: {exc}")
+    return answer["message"]["content"], answer["done_reason"]
+
+
+def _spans_for(a, segment: str) -> list[dict]:
+    content, done = _ask(a, _prompt(a.kinds, segment))
+    if done == "length":
+        if len(segment) <= _FLOOR:
+            sys.exit(f"{a.model} hit the generation cap ({a.num_predict} tokens) on a "
+                     f"{len(segment)}-char segment: it loops on the span list")
+        cut = segment.rfind("\n", 0, len(segment) // 2)
+        if cut <= 0:
+            cut = segment.find("\n", len(segment) // 2)
+        if cut <= 0 or cut + 1 >= len(segment):
+            sys.exit(f"{a.model} hit the generation cap on a segment with no line "
+                     f"break to split at ({len(segment)} chars)")
+        return _spans_for(a, segment[:cut + 1]) + _spans_for(a, segment[cut + 1:])
+    try:
+        return json.loads(content)["spans"]
+    except (json.JSONDecodeError, KeyError, TypeError):
+        sys.exit(f"{a.model} did not answer the span contract: {content[:300]!r}")
+
+
+# markdown markers and punctuation a model drags in at a span's ends; a span
+# of "# JUAN_PEREZ" must redact the name and leave the heading marker
+_EDGE = re.compile(r'^[\s#*>\-:;,.()\[\]"\'“”¿?¡!]+|[\s#*>\-:;,.()\[\]"\'“”¿?¡!]+$')
+
+
+def _trim(span: str) -> str:
+    return _EDGE.sub("", span)
+
+
+def _boundary(span: str) -> re.Pattern:
+    # letters and digits bound a word; `_`, punctuation and space do not. A
+    # markdown transcript escapes `_` and `*` (JUAN\_PEREZ); the model reports
+    # the span unescaped, so a backslash may sit before any character.
+    body = r"\\?".join(re.escape(c) for c in span)
+    return re.compile(r"(?<![^\W_])" + body + r"(?![^\W_])", re.IGNORECASE)
+
+
+def main() -> None:
+    a = _args()
+    text = sys.stdin.read()
+    found: dict[str, str] = {}          # span -> placeholder
+    for seg in _segments(text, a.segment_chars):
+        for s in _spans_for(a, seg):
+            span, kind = _trim(s["text"]), s["kind"]
+            if not span or kind not in a.kinds:
+                continue
+            if span.upper() in {v[0].strip("[]") for v in KINDS.values()}:
+                continue            # a placeholder already in the text
+            pattern = _boundary(span)
+            if not pattern.search(seg):
+                sys.exit(f"{a.model} reported a span that is not in the text: {span!r}")
+            found.setdefault(span, (pattern, KINDS[kind][0]))
+    # longest first, so a full name is replaced before its parts
+    for span in sorted(found, key=len, reverse=True):
+        pattern, placeholder = found[span]
+        text = pattern.sub(placeholder, text)
+    sys.stdout.write(text)
+
+
+if __name__ == "__main__":
+    main()

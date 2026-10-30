@@ -1,0 +1,8 @@
+id: fixture-flow
+version: 1
+entrypoints:
+  - id: docs
+    area: corpus
+pipeline:
+  - id: stamp
+    uses: engine.stamp

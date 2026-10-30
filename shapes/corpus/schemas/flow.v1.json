@@ -1,0 +1,129 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "flow.v1.json",
+  "title": "Moui Corpus Flow",
+  "type": "object",
+  "required": ["id", "version", "entrypoints", "pipeline"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "version": { "type": "integer", "minimum": 1 },
+    "description": { "type": "string" },
+    "fields": { "$ref": "#/definitions/fieldMap" },
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["when", "do"],
+        "additionalProperties": false,
+        "properties": {
+          "when": { "type": "string" },
+          "do": { "type": "string", "enum": ["retire"] }
+        }
+      }
+    },
+    "entrypoints": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "area"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "area": { "type": "string" },
+          "pattern": { "type": "string", "description": "Glob over filenames; absent = every file." },
+          "fields": { "type": "object" }
+        }
+      }
+    },
+    "areas": { "type": "object", "additionalProperties": { "type": "string" } },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "keep": { "type": "boolean" },
+          "to": { "type": "string" }
+        }
+      }
+    },
+    "pipeline": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Ordered stage list. A repeated stage id declares conditional branches dispatched by when:; exactly one branch runs.",
+      "items": { "$ref": "#/definitions/stage" }
+    }
+  },
+  "definitions": {
+    "fieldMap": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/definitions/field" }
+    },
+    "field": {
+      "type": "object",
+      "required": ["type"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "type": "string", "enum": ["string", "number", "bool", "enum", "set"] },
+        "of": { "type": "string", "enum": ["string", "number"] },
+        "values": { "type": "array", "items": { "type": "string" } },
+        "by": {
+          "description": "Who may write this field. A string, or an array when both writers may (e.g. a model classifies and an operator overrides).",
+          "oneOf": [
+            { "type": "string", "enum": ["model", "operator"] },
+            {
+              "type": "array",
+              "items": { "type": "string", "enum": ["model", "operator"] },
+              "minItems": 1,
+              "uniqueItems": true
+            }
+          ]
+        },
+        "confidence_min": { "type": "number", "minimum": 0, "maximum": 1 },
+        "optional": { "type": "boolean", "description": "Model field only: below confidence_min the value is kept under proposed: but the field does NOT park, so the document still completes." }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "enum" } }, "required": ["type"] },
+          "then": { "required": ["values"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "set" } }, "required": ["type"] },
+          "then": { "required": ["of"] }
+        }
+      ]
+    },
+    "stage": {
+      "type": "object",
+      "required": ["id", "uses"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "uses": {
+          "oneOf": [
+            { "type": "string", "minLength": 1 },
+            {
+              "type": "object",
+              "required": ["dispatch_on", "routes"],
+              "additionalProperties": false,
+              "properties": {
+                "dispatch_on": { "type": "string", "enum": ["mime"] },
+                "routes": { "type": "object", "additionalProperties": { "type": "string" } }
+              }
+            }
+          ]
+        },
+        "when": { "type": "string" },
+        "with": { "type": "object" },
+        "artifact": { "type": "string" },
+        "fields": { "$ref": "#/definitions/fieldMap" },
+        "proposes": { "type": "array", "items": { "type": "string" } }
+      },
+      "patternProperties": {
+        "^on_": { "type": "string", "enum": ["quarantine", "fail"] }
+      },
+      "additionalProperties": false
+    }
+  }
+}

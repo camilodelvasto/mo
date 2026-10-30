@@ -1,0 +1,61 @@
+#!/usr/bin/env python3
+# Copyright (C) 2026 Sensata Research GmbH
+# SPDX-License-Identifier: AGPL-3.0-only
+"""api.claude on Amazon Bedrock. Reads a prompt on stdin, calls bedrock-runtime
+`converse` for the configured EU inference profile, and writes the plain answer
+text on stdout — the same shape the local `claude -p` binding emits (emits:
+stdout). The coupling to Bedrock's wire shape lives HERE, in the machine
+binding, never in the engine. Flags: --model <inference-profile-id> --region
+<aws-region> --max-tokens <int> (a required per-call output ceiling — the cost
+cap lives in the binding, set in capabilities.yaml, never silently defaulted).
+Credentials come from the ambient AWS chain (env / profile /
+AWS_SHARED_CREDENTIALS_FILE) — never hardcoded."""
+import argparse
+import sys
+
+from botocore.config import Config
+
+
+def to_text(converse: dict) -> str:
+    blocks = converse["output"]["message"]["content"]
+    return "".join(b.get("text", "") for b in blocks)
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--model", required=True)    # e.g. eu.anthropic.claude-haiku-4-5-20251001-v1:0
+    ap.add_argument("--region", required=True)   # eu-central-1
+    ap.add_argument("--max-tokens", type=int, required=True)  # per-call output ceiling (cost cap)
+    args = ap.parse_args()
+
+    prompt = sys.stdin.read()
+    if not prompt.strip():
+        sys.stderr.write("claude-bedrock: empty prompt on stdin\n")
+        return 1
+
+    import boto3
+    # Adaptive retry: back off + client-side throttle on Bedrock ThrottlingException so a
+    # momentary throttle is retried, not surfaced as a lost turn. The cost cap already
+    # lives in --max-tokens; this bounds transient failures.
+    client = boto3.client("bedrock-runtime", region_name=args.region,
+                          config=Config(retries={"max_attempts": 4, "mode": "adaptive"}))
+    try:
+        resp = client.converse(
+            modelId=args.model,
+            messages=[{"role": "user", "content": [{"text": prompt}]}],
+            inferenceConfig={"maxTokens": args.max_tokens},
+        )
+    except Exception as exc:
+        sys.stderr.write(f"claude-bedrock: bedrock converse failed: {exc}\n")
+        return 2
+
+    answer = to_text(resp)
+    if not answer.strip():                       # no fallback — empty generation is a failure
+        sys.stderr.write(f"claude-bedrock: empty answer (stopReason={resp.get('stopReason')})\n")
+        return 3
+    sys.stdout.write(answer)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

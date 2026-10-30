@@ -1,0 +1,5 @@
+/* Grove dark theme — tokens handle color differences.
+   This file exists for structural overrides only. */
+[data-theme="dark"] {
+  /* No structural overrides — tokens handle everything. */
+}

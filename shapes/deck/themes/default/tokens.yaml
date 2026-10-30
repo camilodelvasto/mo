@@ -1,0 +1,66 @@
+# Deck default theme — walku identity (Raleway/Lato, magenta accent)
+
+font-body: lato
+font-heading: raleway
+font-mono: jetbrains-mono
+
+font-base: 20px
+scale-sm: 0.75
+scale-md: 1
+scale-lg: 1.25
+scale-xl: 1.6
+scale-xxl: 2
+scale-display: 2.5
+
+weight-body: 400
+weight-heading: 700
+weight-label: 500
+
+leading-body: 1.5
+leading-heading: 1.15
+
+palette:
+  magenta: "#E91E90"
+  magenta-dark: "#B8148F"
+  magenta-light: "#F8E1EF"
+  dark: "#1a1a1a"
+  charcoal: "#2d2d2d"
+  light: "#FFFFFF"
+  off-white: "#FAFAFA"
+  warm: "#FBF9F7"
+  warm-gray: "#F5F0EB"
+  beige: "#F5EFE6"
+  lime: "#C4E538"
+  light-gray: "#E8E8E8"
+
+color-bg: warm
+color-text: dark
+color-heading: dark
+color-label: magenta
+color-muted: charcoal
+
+space-sm: 1rem
+space-md: 2rem
+space-lg: 4rem
+space-xl: 6rem
+
+slide-width: 1280px
+slide-height: 720px
+slide-padding: 80px
+
+default-statement-size: xl
+
+reveal:
+  type: slide
+  stagger: true
+  speed: 1.0
+
+effects:
+  underline:
+    colors: [magenta, magenta-dark]
+    width: 60px
+    height: 3px
+  stripe:
+    colors: [magenta, magenta-dark]
+    height: 4px
+    position: bottom

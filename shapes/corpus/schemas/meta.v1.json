@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "meta.v1.json",
+  "title": "Moui Corpus Document Sidecar",
+  "type": "object",
+  "required": ["doc_id", "flow", "status", "stages", "artifacts", "integrity"],
+  "additionalProperties": false,
+  "properties": {
+    "doc_id": { "type": "string", "pattern": "^[0-9a-f]{12}$" },
+    "flow": {
+      "type": "object",
+      "required": ["id", "version", "hash"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "version": { "type": "integer" },
+        "hash": { "type": "string", "pattern": "^sha256:" }
+      }
+    },
+    "status": {
+      "type": "string",
+      "description": "Derived from location; rewritten by the engine at every move.",
+      "pattern": "^(complete|retired|quarantined|(in-flight|parked|failed)@.+)$"
+    },
+    "stages": {
+      "type": "array",
+      "items": {
+        "description": "One entry, whether stage, assert, or event. Custody keys (capability, model, locality, input, output, started, finished, meters, at, ...) are open by design — the custody vocabulary grows; id plus the engine-written blocks are the contract.",
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": { "type": "string" },
+          "fields": { "type": "object" },
+          "proposed": { "type": "object" },
+          "parked": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["path"],
+        "properties": { "path": { "type": "string" } }
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "description": "Engine-written checksum of the document minus this block, the write moment inside the hash. A checksum against mistakes, not a signature against adversaries.",
+      "required": ["hash", "at"],
+      "additionalProperties": false,
+      "properties": {
+        "hash": { "type": "string", "pattern": "^sha256:" },
+        "at": { "type": "string" }
+      }
+    }
+  }
+}

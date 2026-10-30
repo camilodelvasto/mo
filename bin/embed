@@ -1,0 +1,81 @@
+#!/usr/bin/env python3
+# Copyright (C) 2026 Sensata Research GmbH
+# SPDX-License-Identifier: AGPL-3.0-only
+"""local.embed wrapper: chunks.jsonl on stdin -> {ref, vector, dim, model} JSONL
+on stdout, one line per chunk, ref re-attached IN PROCESS so reconcile keys on
+the ref and a reordered batch can never misattribute. No fallbacks: a short,
+misaligned, or malformed batch exits non-zero and names the failure."""
+import argparse
+import json
+import sys
+import urllib.error
+import urllib.request
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--model", required=True)  # the tag lives in capabilities.yaml
+    ap.add_argument("--host", required=True)   # where ollama listens; lives in capabilities.yaml
+    args = ap.parse_args()
+
+    chunks = []
+    for line in sys.stdin:
+        line = line.strip()
+        if line:
+            chunks.append(json.loads(line))
+    if not chunks:
+        return 0  # empty input is a valid empty embed; emit nothing
+
+    refs = [c["ref"] for c in chunks]
+    texts = [c["text"] for c in chunks]
+
+    # One oversized request crashes ollama's runner (tokenize connection reset
+    # observed at ~500 chunks), so the batch is split; each sub-request must
+    # still return exactly one vector per input, served by the same model.
+    BATCH = 64
+    host = args.host.rstrip("/")
+    vectors, served = [], None
+    for at in range(0, len(texts), BATCH):
+        batch = texts[at:at + BATCH]
+        req = urllib.request.Request(
+            f"{host}/api/embed",
+            data=json.dumps({"model": args.model, "input": batch}).encode(),
+            headers={"Content-Type": "application/json"},
+        )
+        try:
+            with urllib.request.urlopen(req) as resp:
+                payload = json.loads(resp.read())
+        except (urllib.error.URLError, OSError, json.JSONDecodeError) as exc:
+            print(f"embed: ollama call failed: {exc}", file=sys.stderr)
+            return 2
+        got = payload.get("embeddings")
+        model = payload.get("model")
+        if not isinstance(got, list) or model is None:
+            print(f"embed: malformed ollama response: {payload!r}", file=sys.stderr)
+            return 3
+        if served is None:
+            served = model
+        elif model != served:
+            print(f"embed: model changed mid-batch: {served} != {model}",
+                  file=sys.stderr)
+            return 3
+        vectors.extend(got)
+
+    if len(vectors) != len(chunks):
+        print(f"embed: count mismatch — {len(chunks)} chunks, "
+              f"{len(vectors)} vectors", file=sys.stderr)
+        return 4
+
+    dim = len(vectors[0])
+    for ref, vec in zip(refs, vectors):
+        if len(vec) != dim:
+            print(f"embed: ragged vector for ref {ref}: {len(vec)} != {dim}",
+                  file=sys.stderr)
+            return 5
+        sys.stdout.write(json.dumps(
+            {"ref": ref, "vector": vec, "dim": dim, "model": served}) + "\n")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

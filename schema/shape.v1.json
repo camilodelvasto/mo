@@ -1,0 +1,189 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "shape.v1.json",
+  "title": "Moui Shape Manifest",
+  "type": "object",
+  "required": ["name", "version", "type", "description", "capabilities", "schemas", "permissions"],
+  "additionalProperties": false,
+  "properties": {
+    "name": { "type": "string", "minLength": 1 },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "type": { "type": "string", "enum": ["renderer", "service", "exporter", "engine"] },
+    "description": { "type": "string" },
+    "capabilities": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["adapter"],
+          "properties": {
+            "adapter": { "type": "string", "minLength": 1 }
+          }
+        }
+      },
+      "properties": {
+        "render": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["type"],
+            "additionalProperties": false,
+            "properties": {
+              "type": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        "export": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["format", "adapter"],
+            "additionalProperties": false,
+            "properties": {
+              "format": { "type": "string", "minLength": 1 },
+              "adapter": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        "build": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["format", "adapter"],
+            "additionalProperties": false,
+            "properties": {
+              "format": { "type": "string", "minLength": 1 },
+              "adapter": { "type": "string", "minLength": 1 },
+              "key_derivation": { "type": "string" }
+            }
+          }
+        },
+        "deploy": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["adapter"],
+            "additionalProperties": false,
+            "properties": {
+              "adapter": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        "init": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["adapter"],
+            "additionalProperties": false,
+            "properties": {
+              "adapter": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "type": "object",
+      "required": ["extends", "defines", "deposits_to"],
+      "additionalProperties": false,
+      "properties": {
+        "extends": { "type": "array", "items": { "type": "string" } },
+        "defines": { "type": "array", "items": { "type": "string" } },
+        "deposits_to": { "type": "string" }
+      }
+    },
+    "themes": {
+      "type": "object",
+      "properties": {
+        "shape_themes": { "type": "string" },
+        "global_tokens": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "permissions": {
+      "type": "object",
+      "required": ["filesystem", "network", "subprocess"],
+      "additionalProperties": false,
+      "properties": {
+        "filesystem": {
+          "type": "object",
+          "required": ["read", "write"],
+          "additionalProperties": false,
+          "properties": {
+            "read": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^(?!/)(?!.*\\.\\./)[a-zA-Z0-9._/-]+$",
+                "description": "Relative path from corpus root. Must end with / for directories."
+              }
+            },
+            "write": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^(?!/)(?!.*\\.\\./)[a-zA-Z0-9._/-]+$",
+                "description": "Relative path from corpus root. Must end with / for directories."
+              }
+            }
+          }
+        },
+        "network": {
+          "type": "string",
+          "enum": ["none", "local", "unrestricted"],
+          "description": "none: no network (guardrail-enforced). local: localhost only. unrestricted: any host."
+        },
+        "subprocess": {
+          "type": "string",
+          "enum": ["none", "restricted"],
+          "description": "none: shape does not spawn child processes. restricted: shape spawns subprocesses declared in capabilities or resolved through the machine capability table."
+        }
+      }
+    },
+    "secrets": { "type": "array", "items": { "type": "string" } },
+    "builtins": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 },
+      "description": "Capability names a pipeline may use that this engine ships itself (engine.*)."
+    },
+    "config": {
+      "type": "object",
+      "required": ["schema", "example"],
+      "additionalProperties": false,
+      "properties": {
+        "schema": { "type": "string", "minLength": 1 },
+        "example": { "type": "string", "minLength": 1 }
+      },
+      "description": "Machine-scoped config contract: a JSON schema and a committed example for a gitignored file."
+    },
+    "state_dir": { "type": "string" },
+    "sample": { "type": "string" },
+    "dependencies": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "python": {
+          "type": "object",
+          "properties": {
+            "import_map": {
+              "type": "object",
+              "additionalProperties": { "type": "string" }
+            }
+          },
+          "additionalProperties": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "system": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

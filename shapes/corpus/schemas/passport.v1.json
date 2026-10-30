@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "passport.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["capability", "model", "dimension", "built_at"],
+  "properties": {
+    "capability": {"type": "string"},
+    "model": {"type": "string"},
+    "dimension": {"type": "integer", "minimum": 1},
+    "built_at": {"type": "string"}
+  }
+}

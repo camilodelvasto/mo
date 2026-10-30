@@ -1,0 +1,3 @@
+# Leaf shape configuration — non-secret settings
+default_theme: default
+# default_adapter: rsync    # uncomment when a deploy adapter is configured

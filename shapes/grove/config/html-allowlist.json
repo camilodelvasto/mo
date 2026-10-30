@@ -1,0 +1,31 @@
+{
+  "tags": [
+    "div", "section", "article", "header", "footer", "nav", "main", "aside",
+    "h1", "h2", "h3", "h4", "h5", "h6", "p", "span", "a", "ul", "ol", "li",
+    "img", "picture", "source", "figure", "figcaption", "button", "label",
+    "form", "input", "textarea", "select", "option", "table", "thead", "tbody",
+    "tr", "td", "th", "blockquote", "pre", "code", "em", "strong", "small",
+    "br", "hr", "svg", "path", "g", "use", "video", "audio", "time", "style"
+  ],
+  "global_attrs": [
+    "class", "id", "role", "tabindex", "title", "lang", "dir", "hidden",
+    "aria-*", "data-*"
+  ],
+  "tag_attrs": {
+    "a": ["href", "target", "rel"],
+    "img": ["src", "alt", "width", "height", "loading", "decoding", "srcset", "sizes"],
+    "source": ["src", "srcset", "type", "media", "sizes"],
+    "input": ["type", "name", "value", "placeholder", "required", "checked", "disabled"],
+    "form": ["action", "method"],
+    "button": ["type", "disabled"],
+    "label": ["for"],
+    "video": ["src", "controls", "poster", "width", "height", "loop", "muted", "playsinline"],
+    "audio": ["src", "controls", "loop", "muted"],
+    "svg": ["viewbox", "fill", "width", "height", "xmlns", "aria-hidden"],
+    "path": ["d", "fill", "stroke", "stroke-width"],
+    "g": ["fill", "transform"],
+    "use": ["href"],
+    "time": ["datetime"]
+  },
+  "void_tags": ["img", "source", "input", "br", "hr", "use", "path"]
+}

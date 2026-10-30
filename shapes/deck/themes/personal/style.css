@@ -1,0 +1,4 @@
+/* Personal theme style overrides — scoped to [data-theme="personal"] */
+[data-theme="personal"] .slide {
+  border-radius: 8px;
+}

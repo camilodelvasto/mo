@@ -1,0 +1,346 @@
+/* Sensata Research theme — scoped to [data-theme="sensata"]
+   Extracted from: audiencias_venezuela_sensata_Marzo23.pdf
+   Typography: Fraunces headings, Inter body
+   Palette: navy/plum darks, magenta/teal accents */
+
+/* === Typography === */
+
+[data-theme="sensata"] .heading {
+  font-family: var(--font-heading, fraunces), serif;
+  font-weight: 700;
+  font-size: calc(var(--font-base, 1rem) * 3.5);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-bottom: 1.5rem;
+  color: inherit;
+}
+
+[data-theme="sensata"] .subheading {
+  font-family: var(--font-heading, fraunces), serif;
+  font-size: calc(var(--font-base, 1rem) * 1.5);
+  font-weight: 400;
+  max-width: 800px;
+  margin-bottom: 2rem;
+  color: color-mix(in srgb, currentColor 65%, transparent);
+}
+
+[data-theme="sensata"] .label {
+  font-family: var(--font-body, inter), system-ui, sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-label-resolved, var(--palette-magenta, #E040FB));
+  margin-bottom: 1.5rem;
+}
+
+[data-theme="sensata"] .body {
+  font-family: var(--font-body, inter), system-ui, sans-serif;
+  font-size: calc(var(--font-base, 1rem) * 1.125);
+  line-height: var(--leading-body, 1.8);
+  color: color-mix(in srgb, currentColor 75%, transparent);
+  max-width: 700px;
+  margin-bottom: 2rem;
+}
+
+[data-theme="sensata"] .body p { margin-bottom: 1rem; }
+[data-theme="sensata"] .body p:last-child { margin-bottom: 0; }
+[data-theme="sensata"] .body strong { font-weight: 700; color: inherit; }
+
+[data-theme="sensata"] .body code {
+  font-family: var(--font-mono, jetbrains-mono), monospace;
+  font-size: 0.9em;
+  background: color-mix(in srgb, currentColor 10%, transparent);
+  padding: 0.15em 0.35em;
+  border-radius: 3px;
+}
+
+[data-theme="sensata"] .quote {
+  font-family: var(--font-heading, fraunces), serif;
+  font-style: italic;
+  font-size: 1.25rem;
+  border-left: 3px solid var(--palette-teal, #2980B9);
+  padding-left: 1em;
+  margin: 1.5em 0;
+  color: color-mix(in srgb, currentColor 85%, transparent);
+}
+
+[data-theme="sensata"] .attribution {
+  font-size: 0.875rem;
+  color: color-mix(in srgb, currentColor 50%, transparent);
+}
+
+[data-theme="sensata"] .caption {
+  font-size: 0.875rem;
+  color: color-mix(in srgb, currentColor 60%, transparent);
+  margin-top: 0.5em;
+}
+
+/* === Tables === */
+
+[data-theme="sensata"] .body table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95em;
+  margin: 1.5em 0;
+}
+
+[data-theme="sensata"] .body th {
+  text-align: left;
+  font-weight: 700;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.75em 1em;
+  border-bottom: 2px solid var(--palette-teal, #2980B9);
+  color: inherit;
+}
+
+[data-theme="sensata"] .body td {
+  padding: 0.6em 1em;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 15%, transparent);
+  color: color-mix(in srgb, currentColor 85%, transparent);
+}
+
+[data-theme="sensata"] .body tr:last-child td {
+  border-bottom: none;
+}
+
+/* === Blockquotes === */
+
+[data-theme="sensata"] .body blockquote {
+  font-style: italic;
+  font-size: 1.125rem;
+  border-left: 3px solid var(--palette-teal, #2980B9);
+  padding-left: 1.25em;
+  margin: 1.5em 0;
+  color: color-mix(in srgb, currentColor 80%, transparent);
+}
+
+/* === Lists === */
+
+[data-theme="sensata"] .body ul {
+  list-style: none;
+  padding-left: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+[data-theme="sensata"] .body ol {
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+[data-theme="sensata"] .body ul li {
+  position: relative;
+  padding-left: 0;
+  font-size: 1.125rem;
+  line-height: 1.6;
+  margin-bottom: 0.75rem;
+}
+
+[data-theme="sensata"] .body ul li::before {
+  content: '';
+  position: absolute;
+  left: -1.25rem;
+  top: 0.6em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--palette-teal, #2980B9);
+}
+
+/* === Element sizes — statement wrapper (size on parent) + per-element === */
+/* Derived from theme tokens: calc(font-base * scale-*) */
+
+[data-theme="sensata"] .size-lg .heading,
+[data-theme="sensata"] .heading.size-lg { font-size: calc(var(--font-base, 1rem) * var(--scale-lg, 1.25) * 2); }
+
+[data-theme="sensata"] .size-xl .heading,
+[data-theme="sensata"] .heading.size-xl { font-size: calc(var(--font-base, 1rem) * var(--scale-xl, 1.5) * 2); }
+
+[data-theme="sensata"] .size-xxl .heading,
+[data-theme="sensata"] .heading.size-xxl { font-size: calc(var(--font-base, 1rem) * var(--scale-xxl, 2) * 1.75); }
+
+[data-theme="sensata"] .size-display .heading,
+[data-theme="sensata"] .heading.size-display {
+  font-size: calc(var(--font-base, 1rem) * var(--scale-display, 3.5) * 1.15);
+  max-width: 1000px;
+  letter-spacing: -0.035em;
+}
+
+[data-theme="sensata"] .body.size-lg { font-size: calc(var(--font-base, 1rem) * var(--scale-lg, 1.25)); }
+[data-theme="sensata"] .body.size-xl { font-size: calc(var(--font-base, 1rem) * var(--scale-xl, 1.5)); }
+[data-theme="sensata"] .body.size-xxl { font-size: calc(var(--font-base, 1rem) * var(--scale-xxl, 2)); }
+[data-theme="sensata"] .body.size-display { font-size: calc(var(--font-base, 1rem) * var(--scale-display, 3.5) * 0.65); }
+
+/* === Cover layout === */
+
+[data-theme="sensata"] .layout-cover .heading {
+  font-size: calc(3.5rem * 1.1);
+  margin-bottom: 0.5rem;
+}
+
+[data-theme="sensata"] .layout-cover .subheading {
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: color-mix(in srgb, currentColor 65%, transparent);
+  margin-bottom: 0;
+}
+
+[data-theme="sensata"] .cover-meta {
+  display: flex;
+  gap: 24px;
+  font-size: 0.875rem;
+  color: color-mix(in srgb, currentColor 50%, transparent);
+  font-weight: 400;
+  margin-top: 1.5rem;
+}
+
+/* === Section divider circles (dark cover backgrounds only) === */
+
+[data-theme="sensata"] .slide[data-bg-dark] .layout-cover {
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme="sensata"] .slide[data-bg-dark] .layout-cover::before,
+[data-theme="sensata"] .slide[data-bg-dark] .layout-cover::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+[data-theme="sensata"] .slide[data-bg-dark] .layout-cover::before {
+  width: 500px;
+  height: 500px;
+  top: -100px;
+  right: -80px;
+  background: color-mix(in srgb, var(--palette-plum, #2D1B3D) 25%, transparent);
+}
+
+[data-theme="sensata"] .slide[data-bg-dark] .layout-cover::after {
+  width: 350px;
+  height: 350px;
+  top: 80px;
+  right: 150px;
+  background: color-mix(in srgb, var(--palette-magenta, #E040FB) 15%, transparent);
+}
+
+/* === Grid cells === */
+
+[data-theme="sensata"] .grid-cell {
+  background: var(--palette-light, #f5f5f5);
+  padding: var(--space-sm, 1rem) var(--space-md, 2rem);
+  border-radius: 4px;
+}
+
+[data-theme="sensata"] .grid-cell .label {
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+}
+
+[data-theme="sensata"] .grid-cell .heading {
+  font-size: 1.5rem;
+  line-height: 1.2;
+  margin-bottom: 0.5rem;
+}
+
+[data-theme="sensata"] .grid-cell .body {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 0;
+}
+
+/* On mobile or scrollable slides, let grid cells grow to fit content */
+@media (max-width: 600px) {
+  [data-theme="sensata"] .grid-cell .heading {
+    font-size: 1.25rem;
+  }
+  [data-theme="sensata"] .grid-cell .body {
+    font-size: 0.85rem;
+  }
+}
+
+/* === Full layout (article/manifesto) === */
+
+[data-theme="sensata"] .layout-full > .slide-media {
+  margin: 0;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+[data-theme="sensata"] .layout-full > .slide-media img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 0;
+}
+
+[data-theme="sensata"] .layout-full.scrollable .body h3 {
+  font-family: var(--font-heading, fraunces), serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--palette-teal);
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.01em;
+}
+
+[data-theme="sensata"] .layout-full.scrollable .body h3:first-child {
+  margin-top: 0;
+}
+
+[data-theme="sensata"] .layout-full.scrollable .body p {
+  margin-bottom: 1rem;
+}
+
+/* === Mobile === */
+
+@media (max-width: 600px) {
+  [data-theme="sensata"] .heading { font-size: calc(var(--font-base, 1rem) * 2); }
+  [data-theme="sensata"] .subheading { font-size: calc(var(--font-base, 1rem) * 1.125); }
+  [data-theme="sensata"] .body { font-size: var(--font-base, 1rem); line-height: var(--leading-body, 1.7); }
+  [data-theme="sensata"] .size-lg .heading,
+  [data-theme="sensata"] .heading.size-lg { font-size: calc(var(--font-base, 1rem) * 1.75); }
+  [data-theme="sensata"] .size-xl .heading,
+  [data-theme="sensata"] .heading.size-xl { font-size: calc(var(--font-base, 1rem) * 2); }
+  [data-theme="sensata"] .size-xxl .heading,
+  [data-theme="sensata"] .heading.size-xxl { font-size: calc(var(--font-base, 1rem) * 2.25); }
+  [data-theme="sensata"] .size-display .heading,
+  [data-theme="sensata"] .heading.size-display { font-size: calc(var(--font-base, 1rem) * 2.5); }
+  [data-theme="sensata"] .layout-cover .heading { font-size: 2.25rem; }
+
+  [data-theme="sensata"] .slide[data-bg-dark] .layout-cover::before {
+    width: 250px;
+    height: 250px;
+    top: -50px;
+    right: -40px;
+  }
+  [data-theme="sensata"] .slide[data-bg-dark] .layout-cover::after {
+    width: 175px;
+    height: 175px;
+    top: 40px;
+    right: 60px;
+  }
+}
+
+@media (min-width: 601px) and (max-width: 900px) {
+  [data-theme="sensata"] .heading { font-size: calc(var(--font-base, 1rem) * 2.5); }
+  [data-theme="sensata"] .size-display .heading,
+  [data-theme="sensata"] .heading.size-display { font-size: calc(var(--font-base, 1rem) * 2.75); }
+  [data-theme="sensata"] .layout-cover .heading { font-size: calc(var(--font-base, 1rem) * 3); }
+}
+
+@media (min-width: 901px) {
+  [data-theme="sensata"] .heading { font-size: calc(var(--font-base, 1rem) * 3.5); }
+  [data-theme="sensata"] .subheading { font-size: calc(var(--font-base, 1rem) * 1.5); }
+}

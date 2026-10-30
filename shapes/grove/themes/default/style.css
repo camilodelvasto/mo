@@ -1,0 +1,5 @@
+/* Grove default theme — structural overrides scoped to [data-theme="default"] */
+/* Token values are injected as CSS custom properties by build.py */
+[data-theme="default"] {
+  /* No structural overrides in default. Tokens handle everything. */
+}

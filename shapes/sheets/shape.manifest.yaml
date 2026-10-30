@@ -1,0 +1,56 @@
+name: sheets
+version: 0.1.0
+type: service
+description: Structured data shape. Ingests content, processes via inference pipeline, renders as table (web or TUI), exports to CSV/XLSX.
+
+capabilities:
+  serve:
+    - adapter: commands/serve.py
+  tui:
+    - adapter: commands/tui.py
+  ingest:
+    - adapter: commands/ingest.py
+  rebuild:
+    - adapter: commands/rebuild.py
+  watch:
+    - adapter: commands/watch.py
+  new:
+    - adapter: commands/new.py
+  import:
+    - adapter: commands/import_cmd.py
+  export:
+    - format: csv
+      adapter: commands/export_cmd.py
+    - format: xlsx
+      adapter: commands/export_cmd.py
+  status:
+    - adapter: commands/status.py
+
+schemas:
+  extends: []
+  defines: [sheet.v1.json, ops.v1.json]
+  deposits_to: content/schema/
+
+permissions:
+  filesystem:
+    read: [content/]
+    write: [content/, .corpus/shapes/sheets/]
+  network: local
+  subprocess: none
+
+dependencies:
+  python:
+    core:
+      - fastapi>=0.100
+      - uvicorn>=0.20
+      - pyyaml>=6.0
+      - requests>=2.28
+      - textual>=0.50
+      - trafilatura>=1.6
+      - watchdog>=3.0
+    export.xlsx:
+      - openpyxl>=3.1
+    import_map:
+      pyyaml: yaml
+
+state_dir: .corpus/shapes/sheets/

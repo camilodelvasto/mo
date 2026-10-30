@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "bite.v1.json",
+  "title": "Moui Bite Base Type",
+  "description": "Base metadata fields embedded in every content file. YAML files use top-level fields. Markdown files use frontmatter.",
+  "type": "object",
+  "required": ["instance", "version", "schema"],
+  "properties": {
+    "instance": { "type": "string", "minLength": 1, "description": "Instance name — must match a key in moui.json shapes" },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$", "description": "Shape version at time of creation" },
+    "schema": { "type": "string", "pattern": "\\.v[0-9]+\\.json$", "description": "Schema file name — must resolve to content/schema/" },
+    "theme": { "type": "string", "description": "Relative path from this file to the theme directory (e.g. 'themes/pitch')" },
+    "created": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$", "description": "ISO 8601 date" },
+    "tags": { "type": "array", "items": { "type": "string" } }
+  }
+}

@@ -1,0 +1,50 @@
+# Deck personal theme — warm, expressive
+
+font-body: inter
+font-heading: fraunces
+font-mono: jetbrains-mono
+
+font-base: 1rem
+scale-sm: 0.875
+scale-md: 1
+scale-lg: 1.25
+scale-xl: 1.5
+scale-xxl: 2
+scale-display: 3.5
+
+weight-body: 400
+weight-heading: 700
+weight-label: 500
+
+leading-body: 1.6
+leading-heading: 1.1
+
+palette:
+  dark: "#2d3436"
+  midnight: "#2d3436"
+  light: "#fdf5e6"
+  warm: "#ffeaa7"
+  beige: "#f5efe6"
+  accent: "#e17055"
+  muted: "#636e72"
+  white: "#ffffff"
+
+color-bg: warm
+color-text: dark
+color-heading: dark
+color-label: accent
+color-muted: muted
+
+space-sm: 1rem
+space-md: 2rem
+space-lg: 4rem
+space-xl: 6rem
+
+slide-width: 1280px
+slide-height: 720px
+slide-padding: "4rem 5rem"
+
+reveal:
+  type: fade
+  stagger: true
+  speed: 0.9

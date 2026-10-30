@@ -1,0 +1,56 @@
+#!/usr/bin/env python3
+# Copyright (C) 2026 Sensata Research GmbH
+# SPDX-License-Identifier: AGPL-3.0-only
+"""media.image — the attachment verifier/compressor. Reads raw image bytes on
+stdin; decodes and RE-ENCODES to a canonical WebP on stdout. The decode→re-encode
+IS the security act: it neutralizes malformed/exploit/polyglot payloads and drops
+ALL input metadata (EXIF/GPS) — nothing from the source survives except pixels.
+Undecodable input is a rejection (nonzero exit, stderr), never a passthrough."""
+import argparse
+import io
+import sys
+
+from PIL import Image
+
+# The canonical form's bounds are DECLARED on the capability binding, never buried
+# here: each is required, and a binding that omits one is refused at argparse.
+# --max-pixels is the refusal bound read from the header before any decode (a decode
+# allocates ~3 bytes per pixel per copy; Pillow's own bomb limit of 178 MP would
+# still let a 100-byte PNG take a gigabyte).
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--max-edge", type=int, required=True)
+    ap.add_argument("--quality", type=int, required=True)
+    ap.add_argument("--max-pixels", type=int, required=True)
+    args = ap.parse_args()
+    raw = sys.stdin.buffer.read()
+    if not raw:
+        sys.stderr.write("image-canonicalize: empty input on stdin\n")
+        return 1
+    try:
+        img = Image.open(io.BytesIO(raw))            # lazy: reads the header, decodes nothing yet
+    except Exception as exc:                         # PIL raises many types; all mean "not a usable image"
+        sys.stderr.write(f"image-canonicalize: could not decode input as an image: {exc}\n")
+        return 1
+    w, h = img.size
+    if w * h > args.max_pixels:                      # the header's claim, before any allocation
+        sys.stderr.write(f"image-canonicalize: {w}x{h} = {w * h} pixels exceeds the bound of {args.max_pixels}\n")
+        return 1
+    try:
+        img.load()                                   # force a full decode (catches truncation)
+    except Exception as exc:
+        sys.stderr.write(f"image-canonicalize: could not decode input as an image: {exc}\n")
+        return 1
+    img = img.convert("RGB")                         # canonical color; drops alpha/palette quirks
+    img.thumbnail((args.max_edge, args.max_edge))    # downscale in place if larger; no upscale
+    out = io.BytesIO()
+    # A fresh image object with NO exif/icc argument → the re-encode carries no metadata.
+    img.save(out, format="WEBP", quality=args.quality, method=6)
+    sys.stdout.buffer.write(out.getvalue())
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

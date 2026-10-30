@@ -1,0 +1,21 @@
+search_placeholder: "Search posts..."
+search_no_results: "No results found."
+search_aria: "Search"
+search_input_aria: "Search posts"
+toc: "Table of Contents"
+toggle_theme: "Toggle theme"
+clear_site: "Clear site data"
+reading_progress: "Reading progress"
+skip_to_content: "Skip to content"
+gate_subtitle: "This site is private. Enter the access code to continue."
+gate_label: "Access code"
+gate_submit: "Unlock"
+gate_error: "Wrong access code — try again."
+load_error_title: "Unable to load"
+load_error_body: "The grove could not be loaded. Check your connection and reload."
+archive_title: "Archive"
+# Chat feature strings are NOT listed here on purpose: this file is the GLOBAL
+# required-key set (strings.py::_reference_keys), so a key here forces EVERY grove
+# theme to carry it. Chat is opt-in — its string values live in the shape default
+# theme (themes/default/strings.yaml) and a grove with a chat feature adds them to
+# its own theme to localize; otherwise the client's textContent fallbacks apply.

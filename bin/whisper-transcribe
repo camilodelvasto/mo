@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Thin adapter: local.whisper expects `whisper-transcribe <input> <output>` and
+# the engine verifies the transcript appears exactly at <output>. whisper-
+# ctranslate2 only writes <stem>.txt into an --output_dir, so this wrapper runs
+# it into a temp dir and moves the result to the path the engine expects.
+# Spanish corpus → --language es. Swap the model for accuracy vs speed.
+set -euo pipefail
+
+input="$1"
+output="$2"
+
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+wct2="$here/../.venv/bin/whisper-ctranslate2"
+
+tmp="$(mktemp -d)"
+trap 'rm -rf "$tmp"' EXIT
+
+"$wct2" "$input" \
+  --language es \
+  --model small \
+  --output_dir "$tmp" \
+  --output_format txt \
+  --verbose False >/dev/null
+
+stem="$(basename "${input%.*}")"
+mv "$tmp/$stem.txt" "$output"

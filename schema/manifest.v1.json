@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "manifest.v1.json",
+  "title": "Moui Corpus Manifest",
+  "type": "object",
+  "required": ["v", "name", "shapes"],
+  "additionalProperties": false,
+  "properties": {
+    "v": { "type": "integer", "const": 1 },
+    "name": { "type": "string", "minLength": 1 },
+    "shapes": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["shape", "version", "local"],
+        "additionalProperties": false,
+        "properties": {
+          "shape": { "type": "string", "minLength": 1 },
+          "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+          "local": { "type": "boolean" }
+        }
+      }
+    },
+    "registry": {
+      "type": "array",
+      "items": { "type": "string", "format": "uri" }
+    },
+    "inference": {
+      "type": "object",
+      "properties": {
+        "default": {
+          "type": "object",
+          "required": ["backend", "model"],
+          "additionalProperties": false,
+          "properties": {
+            "backend": { "type": "string", "minLength": 1 },
+            "model": { "type": "string", "minLength": 1 }
+          }
+        }
+      },
+      "additionalProperties": {
+        "type": "object",
+        "required": ["backend", "model"],
+        "additionalProperties": false,
+        "properties": {
+          "backend": { "type": "string", "minLength": 1 },
+          "model": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

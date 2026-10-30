@@ -1,0 +1,10 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "leaf.config.schema.json",
+  "title": "Leaf Shape Configuration",
+  "type": "object",
+  "properties": {
+    "default_theme": { "type": "string", "default": "default" },
+    "default_adapter": { "type": "string" }
+  }
+}

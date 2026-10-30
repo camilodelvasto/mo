@@ -1,0 +1,87 @@
+name: corpus
+version: 0.1.0
+type: engine                  # not a renderer — infrastructure that prepares data
+description: >
+  Declarative corpus preparation. Watches one corpus folder; reacts to files,
+  flow edits, and asserts by moving each file+meta.yaml pair through
+  pipeline stages. Filesystem is the state. The engine is the only writer of
+  meta files. No fallbacks: missing capability throws at startup.
+
+# the CLI surface — mo corpus <cmd> <path>. Each entry dispatches to a command
+# file, the same adapter contract every shape's CLI uses. These are commands,
+# not pipeline capabilities; the two concepts share a word and nothing else.
+capabilities:
+  watch:
+    - adapter: commands/watch.py
+  assert:
+    - adapter: commands/assert_cmd.py
+  status:
+    - adapter: commands/status.py
+  tasks:
+    - adapter: commands/tasks.py
+  ls:
+    - adapter: commands/ls.py
+  show:
+    - adapter: commands/show.py
+  serve:
+    - adapter: commands/serve.py
+  order:
+    - adapter: commands/order_cmd.py
+  reprocess:
+    - adapter: commands/reprocess.py
+  catalogue:
+    - adapter: commands/catalogue.py
+  index:
+    - adapter: commands/index_cmd.py
+  verify:
+    - adapter: commands/verify_cmd.py
+  find:
+    - adapter: commands/find.py
+  ask:
+    - adapter: commands/ask.py
+  query:
+    - adapter: commands/query.py
+
+schemas:
+  extends: []
+  defines:
+    - corpus.v1.json          # the corpus.yaml shape
+    - flow.v1.json            # the flow.yaml contract
+    - meta.v1.json            # the meta.yaml sidecar
+    - assert.v1.json          # an inbox assert file
+    - capabilities.v1.json    # the machine binding table
+    - chunk.v1.json           # a chunks.jsonl record
+    - order.v1.json           # an inbox order file (retire | reprocess)
+    - ask.v1.json             # the ask.yaml contract
+    - passport.v1.json        # the index passport
+  deposits_to: content/schema/
+
+# names a pipeline may `uses:` — NOT CLI commands. engine.* are builtins
+# shipped here under builtins/; local.* / api.* are bound in the machine-root
+# capabilities.yaml and never appear in this manifest.
+builtins:
+  - engine.stamp
+  - engine.passthrough
+  - engine.wrap-md
+  - engine.chunk-ast
+  - engine.strip-media
+  - engine.rename
+
+permissions:
+  filesystem:
+    read:  [content/, capabilities.yaml]
+    write: [content/]         # only ever inside the watched corpus folder
+  network: local              # the read service (mo corpus serve) binds 127.0.0.1
+                              # only; the engine itself opens no sockets, and
+                              # api.* capabilities spawn their own tools
+  subprocess: restricted      # the engine spawns processes. WHAT it spawns is
+                              # bound per machine in capabilities.yaml, so the
+                              # manifest declares THAT it spawns — never a
+                              # binary list that would drift from the table
+
+config:
+  # machine-scoped binding table, at the 018 root, gitignored
+  schema:  config/capabilities.schema.json
+  example: config/capabilities.example.yaml
+
+sample: preview/corpus-example/

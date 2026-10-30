@@ -1,0 +1,109 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "slide.v1.json",
+  "title": "Moui Slide",
+  "description": "A single slide. layout + id at top, then content/style/meta blocks.",
+  "type": "object",
+  "required": ["layout"],
+  "additionalProperties": false,
+  "definitions": {
+    "elementStyle": {
+      "type": "object",
+      "properties": {
+        "size": { "type": "string", "enum": ["lg", "xl", "xxl", "display"] },
+        "align": { "type": "string", "enum": ["left", "center", "right"] },
+        "effect": {},
+        "color": { "type": "string" },
+        "weight": { "type": "integer" },
+        "maxHeight": { "type": "string" },
+        "maxWidth": { "type": "string" }
+      }
+    },
+    "reveal": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["fade", "slide", "rise", "none"] },
+        "stagger": { "type": "boolean" },
+        "speed": { "type": "number", "minimum": 0.1, "maximum": 5 }
+      }
+    },
+    "contentBlock": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "heading": { "type": "string" },
+        "subheading": { "type": "string" },
+        "label": { "type": "string" },
+        "body": { "type": "string" },
+        "media": { "type": "string" },
+        "interactive": { "type": "boolean", "description": "When true, HTML artifact receives pointer events (no overlay)." },
+        "caption": { "type": "string" },
+        "quote": { "type": "string" },
+        "attribution": { "type": "string" },
+        "size": { "type": "string", "enum": ["lg", "xl", "xxl", "display"] },
+        "component": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "data": { "type": "object" }
+      }
+    },
+    "styleBlock": {
+      "type": "object",
+      "properties": {
+        "bg": {},
+        "color": { "type": "string" },
+        "align": { "type": "string", "enum": ["left", "center", "right"] },
+        "valign": { "type": "string", "enum": ["top", "middle", "bottom"] },
+        "padding": { "type": "string" },
+        "flush": { "type": "boolean", "description": "When true, zeroes horizontal padding on the slide frame. Chrome (header) compensates." },
+        "scroll": { "type": "boolean" },
+        "ratio": { "type": "string", "pattern": "^[0-9]+/[0-9]+$" },
+        "columns": {},
+        "gap": { "type": "string" },
+        "divider": { "type": "string" },
+        "effect": {},
+        "reveal": { "$ref": "#/definitions/reveal" },
+        "heading": { "$ref": "#/definitions/elementStyle" },
+        "subheading": { "$ref": "#/definitions/elementStyle" },
+        "label": { "$ref": "#/definitions/elementStyle" },
+        "body": { "$ref": "#/definitions/elementStyle" },
+        "caption": { "$ref": "#/definitions/elementStyle" },
+        "attribution": { "$ref": "#/definitions/elementStyle" }
+      }
+    },
+    "panelBlock": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "content": { "$ref": "#/definitions/contentBlock" },
+        "style": { "$ref": "#/definitions/styleBlock" },
+        "panels": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/panelBlock" },
+          "minItems": 1
+        }
+      }
+    }
+  },
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z0-9-]+$", "description": "Optional stable slug. Renderer falls back to index." },
+    "layout": {
+      "type": "string",
+      "enum": ["cover", "statement", "full", "bleed", "split", "split-stack", "grid"]
+    },
+    "content": { "$ref": "#/definitions/contentBlock" },
+    "style": { "$ref": "#/definitions/styleBlock" },
+    "meta": {
+      "type": "object",
+      "properties": {
+        "author": { "type": "string" },
+        "date": { "type": "string" }
+      }
+    },
+    "left": { "$ref": "#/definitions/panelBlock" },
+    "right": { "$ref": "#/definitions/panelBlock" },
+    "cells": {
+      "type": "array",
+      "description": "Grid cells. Each has content: and style: blocks.",
+      "items": { "$ref": "#/definitions/panelBlock" }
+    }
+  }
+}

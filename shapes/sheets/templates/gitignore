@@ -1,0 +1,4 @@
+state.sqlite
+ingest/inbox/
+ingest/failed/
+exports/

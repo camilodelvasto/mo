@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Sheet Definition",
+  "type": "object",
+  "required": ["title", "fields", "pipeline"],
+  "properties": {
+    "title": { "type": "string" },
+    "port": { "type": "integer", "minimum": 1024, "maximum": 65535 },
+    "inference": {
+      "type": "object",
+      "properties": {
+        "default": {
+          "oneOf": [
+            { "type": "string" },
+            {
+              "type": "object",
+              "required": ["backend"],
+              "properties": {
+                "backend": { "type": "string" },
+                "model": { "type": "string" }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "keys": {
+      "type": "object",
+      "properties": {
+        "view": { "type": "string", "minLength": 1, "maxLength": 1 },
+        "search": { "type": "string", "minLength": 1, "maxLength": 1 },
+        "toggle_hidden": { "type": "string", "minLength": 1, "maxLength": 1 },
+        "open": { "type": "string", "minLength": 1, "maxLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "pipeline": {
+      "type": "object",
+      "required": ["inputs"],
+      "properties": {
+        "inputs": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["op"],
+            "properties": {
+              "prompt": { "type": "string" },
+              "op": { "enum": ["insert", "update", "append"] },
+              "target_field": { "type": "string" },
+              "preprocess": { "type": "string" },
+              "browser": { "enum": ["none", "headless", "visible"] },
+              "bypass_inference": { "type": "boolean" },
+              "key": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1,
+                "not": { "enum": ["q", "r", "?"] }
+              },
+              "description": { "type": "string" },
+              "context": {
+                "type": "object",
+                "additionalProperties": {
+                  "enum": ["required"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "fields": {
+      "type": "object",
+      "additionalProperties": {
+        "oneOf": [
+          { "type": "string" },
+          {
+            "type": "object",
+            "required": ["type"],
+            "properties": {
+              "type": { "type": "string" },
+              "label": { "type": "string" },
+              "values": { "type": "array", "items": { "type": "string" } },
+              "width": { "type": "integer", "minimum": 1 },
+              "align": { "enum": ["left", "right", "center"] },
+              "description": { "type": "string" },
+              "action": { "type": "string" },
+              "key": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1
+              }
+            },
+            "additionalProperties": false
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,81 @@
+instance: deck
+version: 0.3.0
+schema: deck.v1.json
+theme: default
+title: Introduction to Moui
+created: 2026-04-07
+tags: [example, introduction]
+
+slides:
+  - id: intro
+    layout: cover
+    content:
+      heading: Introduction to Moui
+      subheading: A local-first personal computing platform
+    meta:
+      author: Moui
+      date: 2026-04-07
+
+  - id: ownership
+    layout: statement
+    style:
+      bg: { from: dark, to: midnight }
+      color: light
+    content:
+      heading: Your data belongs to you
+      size: display
+
+  - id: what-is-moui
+    layout: full
+    content:
+      heading: What is moui?
+      body: |
+        A substrate on which applications run as shapes.
+
+        Your data is files on disk. Shapes render and transform it.
+        Replace any shape — the data survives.
+
+  - id: layers-and-start
+    layout: split
+    style:
+      ratio: "50/50"
+    left:
+      content:
+        heading: Three layers
+        body: |
+          **Data** — what exists. Permanent, portable, human-readable.
+
+          **Infrastructure** — what runs. Ephemeral, reconstructable.
+
+          **Interface** — what renders. Shape-owned, always rebuildable.
+    right:
+      content:
+        heading: Get started
+        body: |
+          `moui check` — validate the corpus
+
+          `moui deck serve` — render this presentation
+
+          `moui leaf serve` — render a blog post
+
+          Edit the YAML. The browser updates.
+
+  - id: principles
+    layout: grid
+    style:
+      columns: 3
+      bg: dark
+      color: light
+    cells:
+      - content:
+          heading: Privacy
+          label: Principle
+          body: The system cannot leak what it does not transmit.
+      - content:
+          heading: Ownership
+          label: Principle
+          body: Your data should be yours to move, verify, and protect.
+      - content:
+          heading: Joy
+          label: Principle
+          body: Technology should produce joy, not extraction.

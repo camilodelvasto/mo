@@ -1,0 +1,62 @@
+name: deck
+version: 0.4.0
+type: renderer
+description: Slideshow renderer with multi-theme support, static build, and document export.
+
+capabilities:
+  render:
+    - type: deck
+    - type: slide
+  build:
+    - format: static
+      adapter: exporters/build.py
+    - format: static-encrypted
+      adapter: exporters/build.py
+      key_derivation: bip39
+  export:
+    - format: pptx
+      adapter: exporters/pptx.py
+    - format: pdf
+      adapter: exporters/pdf.py
+  deploy:
+    - adapter: codeberg-pages
+
+schemas:
+  extends: [bite.v1.json]
+  defines: [slide.v1.json, deck.v1.json]
+  deposits_to: content/schema/
+
+themes:
+  shape_themes: themes/
+
+permissions:
+  filesystem:
+    read: [content/]
+    write: [shapes/deck/.rendered/, .corpus/shapes/deck/]
+  network: none
+  subprocess: restricted
+
+dependencies:
+  python:
+    core:
+      - pyyaml>=6.0
+      - jsonschema>=4.0
+    export.pdf:
+      - playwright>=1.40
+      - Pillow>=10.0
+    export.pptx:
+      - python-pptx>=0.6
+    build.encrypted:
+      - cryptography>=41.0
+      - mnemonic>=0.20
+    import_map:
+      pyyaml: yaml
+      Pillow: PIL
+      python-pptx: pptx
+  system:
+    export.pdf:
+      - chromium
+
+state_dir: .corpus/shapes/deck/
+
+sample: preview/deck-example.yaml

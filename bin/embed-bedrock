@@ -1,0 +1,70 @@
+#!/usr/bin/env python3
+# Copyright (C) 2026 Sensata Research GmbH
+# SPDX-License-Identifier: AGPL-3.0-only
+"""local.embed on Amazon Bedrock (Titan Text Embeddings V2) — the embedder-free
+box's binding for `local.embed`. chunks.jsonl on stdin -> {ref, vector, dim,
+model} JSONL on stdout, one line per chunk, ref re-attached IN PROCESS so
+reconcile keys on the ref and a reordered batch can never misattribute. Same
+wire contract as bin/embed; ollama swapped for a Bedrock invoke_model call.
+
+Titan embeds ONE inputText per call (no batch array), so we loop per chunk.
+--dimensions is REQUIRED and passed to Titan on every call: the passport and
+the vec_chunks table bake one dimension at build, so the embedder must request
+exactly that dimension, never silently default it. No fallbacks: a malformed
+response, a wrong-width vector, or a failed call exits non-zero and names the
+ref. Credentials come from the ambient AWS chain — never hardcoded."""
+import argparse
+import json
+import sys
+
+
+def to_body(text: str, dimensions: int, normalize: bool) -> str:
+    """The Titan Text Embeddings V2 request body. dimensions is explicit so the
+    served width is deterministic and matches the passport."""
+    return json.dumps({"inputText": text, "dimensions": dimensions, "normalize": normalize})
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--model", required=True)        # the model id; lives in capabilities.yaml
+    ap.add_argument("--region", required=True)       # AWS region; lives in capabilities.yaml
+    ap.add_argument("--dimensions", type=int, required=True)  # baked into the passport — never defaulted
+    ap.add_argument("--normalize", default="true", choices=["true", "false"])
+    args = ap.parse_args()
+    normalize = args.normalize == "true"
+
+    chunks = []
+    for line in sys.stdin:
+        line = line.strip()
+        if line:
+            chunks.append(json.loads(line))
+    if not chunks:
+        return 0  # empty input is a valid empty embed; emit nothing
+
+    import boto3
+    client = boto3.client("bedrock-runtime", region_name=args.region)
+
+    for chunk in chunks:
+        ref = chunk["ref"]
+        try:
+            resp = client.invoke_model(modelId=args.model, body=to_body(chunk["text"], args.dimensions, normalize))
+            payload = json.loads(resp["body"].read())
+        except Exception as exc:        # no fallback — a failed embed names its ref and stops
+            print(f"embed-bedrock: invoke failed for ref {ref}: {exc}", file=sys.stderr)
+            return 2
+
+        vec = payload.get("embedding")
+        if not isinstance(vec, list):
+            print(f"embed-bedrock: malformed response for ref {ref}: {payload!r}", file=sys.stderr)
+            return 3
+        if len(vec) != args.dimensions:
+            print(f"embed-bedrock: wrong width for ref {ref}: {len(vec)} != {args.dimensions}", file=sys.stderr)
+            return 4
+
+        sys.stdout.write(json.dumps(
+            {"ref": ref, "vector": vec, "dim": args.dimensions, "model": args.model}) + "\n")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

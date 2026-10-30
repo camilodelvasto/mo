@@ -1,0 +1,30 @@
+/* NOTE: CSS custom properties in this file use leaf's token naming convention.
+   They will resolve once the leaf renderer wires applyCSSVariables.
+   Variable names will be audited and aligned at that time. */
+
+[data-theme="default"] {
+  max-width: var(--spacing-content-width);
+  margin: 0 auto;
+  padding: var(--spacing-padding);
+  font-family: var(--typography-body);
+  font-size: var(--typography-base-size);
+  line-height: var(--typography-line-height);
+  color: var(--colors-text);
+  background: var(--colors-background);
+}
+
+[data-theme="default"] h1,
+[data-theme="default"] h2,
+[data-theme="default"] h3 {
+  font-family: var(--typography-heading);
+  font-weight: var(--typography-heading-weight);
+  color: var(--colors-primary);
+}
+
+[data-theme="default"] a {
+  color: var(--colors-accent);
+}
+
+[data-theme="default"] code {
+  font-family: var(--typography-mono);
+}

@@ -1,0 +1,13 @@
+doc_id: aaaaaaaaaaaa
+flow:
+  id: fixture-flow
+  version: 1
+  hash: sha256:00
+status: complete
+stages:
+- id: x
+  fields: {}
+artifacts: {}
+integrity:
+  hash: sha256:c2ed3b9ee0d9119f8b66d1d2bdc0efe740ce48abcd6172a5a4344503e0741298
+  at: '2026-06-19T12:27:43.942251+00:00'

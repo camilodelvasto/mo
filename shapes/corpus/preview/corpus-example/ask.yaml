@@ -1,0 +1,29 @@
+id: acme-ask
+version: 1
+flow: ./flow.yaml
+index:
+  uses: local.embed
+  source: chunks
+  fusion: rrf
+asks:
+  - id: find
+    retrieve: { mode: hybrid, k: 12 }
+  - id: answer
+    retrieve: { mode: hybrid, k: 8 }
+    where: visibility == general
+    prime: grounded
+    synthesize:
+      uses: api.claude
+      prompt: |
+        Answer the question from the passages below. Cite each claim with the
+        [doc:chunk] marker of the passage that supports it.
+
+        ${retrieved}
+
+        Question: ${question}
+    check: citations
+profiles:
+  grounded:
+    system: |
+      You answer questions about a research corpus. You are precise and you do
+      not speculate.

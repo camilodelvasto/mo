@@ -1,0 +1,57 @@
+#!/usr/bin/env python3
+# Copyright (C) 2026 Sensata Research GmbH
+# SPDX-License-Identifier: AGPL-3.0-only
+"""Synthesis envelope adapter for the Claude CLI.
+
+Reads a prompt on stdin, runs `claude -p … --output-format json`, and maps
+Claude's JSON to the moui synthesis envelope on stdout:
+
+    {"answer", "model", "usage": {input_tokens, output_tokens,
+     cache_read_input_tokens}, "cost_usd", "duration_ms"}
+
+The coupling to the Claude CLI's JSON shape lives HERE, in the machine binding,
+not in the corpus engine — the engine only reads the normalized envelope (a
+capability with `emits: envelope`). Any flag passed to this wrapper (e.g.
+`--model claude-opus-4-8`) is forwarded to `claude`."""
+import json
+import subprocess
+import sys
+
+
+def to_envelope(claude: dict) -> dict:
+    """Map the Claude CLI JSON object to the moui synthesis envelope. The model id
+    is the single key of `modelUsage`; tokens and cost come from `usage` /
+    `total_cost_usd`; `duration_ms` is the wall time Claude reports."""
+    model = next(iter(claude.get("modelUsage", {})), None)
+    usage = claude.get("usage", {})
+    return {
+        "answer": claude["result"],
+        "model": model,
+        "usage": {
+            "input_tokens": usage.get("input_tokens"),
+            "output_tokens": usage.get("output_tokens"),
+            "cache_read_input_tokens": usage.get("cache_read_input_tokens"),
+        },
+        "cost_usd": claude.get("total_cost_usd"),
+        "duration_ms": claude.get("duration_ms"),
+    }
+
+
+def main() -> int:
+    prompt = sys.stdin.read()
+    proc = subprocess.run(
+        ["claude", "-p", *sys.argv[1:], "--output-format", "json"],
+        input=prompt.encode(), capture_output=True)
+    if proc.returncode != 0:
+        sys.stderr.write(proc.stderr.decode(errors="replace"))
+        return proc.returncode
+    claude = json.loads(proc.stdout.decode())
+    if claude.get("is_error"):
+        sys.stderr.write(f"claude reported an error: {claude.get('result')!r}\n")
+        return 1
+    sys.stdout.write(json.dumps(to_envelope(claude), ensure_ascii=False))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

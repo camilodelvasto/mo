@@ -1,0 +1,307 @@
+# --- field conventions --------------------------------------------------------
+# A stage declares `fields:` ONLY for document-describing facts it
+# contributes. Operational outcomes go to meters automatically. Every field
+# names its expected writer:
+#
+#   by: model      — the stage's output IS the value. With `confidence_min`,
+#                    the engine reads confidence from the stage's meters:
+#                    at or above the gate the value lands in the entry's
+#                    `fields:`; below it the answer is recorded under
+#                    `proposed:` (visible in the log and the catalogue,
+#                    invisible to the fold) and the field joins `parked:`.
+#   by: operator   — a human judgment. The stage runs its model part (if
+#                    any), writes its model fields, then parks until an
+#                    assert fills the operator fields. A model emitting an
+#                    operator field is an engine error, loudly.
+#
+# A stage may additionally declare `proposes:` — flow-level operator fields
+# it suggests values for. Proposals land under `proposed:`, never park
+# anything, and surface in the catalogue's soft queue until confirmed,
+# edited, or dismissed by an assert.
+#
+# Parking: when a stage finishes with unresolved fields, the engine writes
+# their names under `parked:` in the stage's entry and moves the pair to
+# working/<stage>/. `parked:` is engine behavior — the machine-readable
+# checklist that mo tasks and the catalogue read.
+#
+# Asserts: the single human write path. An assert FILE (doc_id + fields)
+# dropped in inbox/ — by mo assert, by the catalogue, by anything — is
+# consumed by the engine, which VALIDATES it against this flow (by:
+# permission, type, enum membership, set shape), appends it as an assert
+# entry with `via:` provenance, re-checks parking (all parked fields
+# satisfied → flow continues at the next stage), and re-evaluates `rules:`.
+# An invalid assert goes to failed/inbox/ with the reason — never silently
+# dropped, never partially applied. One writer, one validation point.
+#
+# Default when `by:` is omitted: model, no gate.
+#
+# Types: string, number, bool, enum (closed vocabulary, becomes a catalogue
+# dropdown), set. A `set` folds differently from scalars: entries write
+#   tags: { add: [a, b], remove: [c] }     (a bare list means add)
+# and the projection is the union of adds minus removes, in log order. No
+# entry needs to know the current state to write — append-only stays honest,
+# and two people tagging never erase each other.
+#
+# --- failure vocabulary ---------------------------------------------------------
+# Handlers: quarantine (flow ends), fail (failed/<stage>/, repaired and
+# retried via --restart), retire (rules only — see below). Default for any
+# undeclared failure is `fail` — including stamp rejecting an unsupported
+# type. Parking is NOT a failure handler: park is for humans (a stage
+# finishing with unresolved fields awaits an assert), fail is for repairs.
+# A stage whose `when:` is false writes a one-line skip entry
+# ({ id: <stage>, skipped: <condition> }) so the log reads complete and the
+# custody chain needs no interpretation.
+#
+# Duplicates: doc_id derives from the original's content hash. A file whose
+# hash matches an existing document — any status — creates no new pair; the
+# engine appends a `received-duplicate` event (entrypoint, source_name,
+# timestamp) to the EXISTING document's log and discards the drop. Re-running
+# a document is a deliberate act (mo reprocess), never an accident of
+# dropping the same file twice.
+
+id: corpus-prep
+version: 4                  # recorded (with this file's hash) in every
+                            # sidecar's identity block. Vocabulary edits bump
+                            # it; documents processed under an older version
+                            # say so, and reprocessing is a deliberate act.
+description: >
+  Prepare a corpus from heterogeneous files (pdf, txt, md, audio, images).
+  Normalize to a markdown transcript, anonymize private documents, chunk on
+  the markdown AST, characterize by type. Chunks keep relative on-disk
+  references to both the transcript and the original. A document is
+  complete only when fully characterized — model fields above their gates,
+  operator fields asserted. The log stays open afterwards: tags and
+  corrections arrive as asserts at any time, and rules keep watching.
+
+# --- flow-level fields — assert-only vocabulary, attached to no stage --------
+# Open-ended characterization with no producing step. The catalogue renders
+# them as editable columns on every row; values arrive only as asserts.
+# Stages may `propose:` values for them — that is how tags actually get
+# filled: the model suggests during datasheet, the operator confirms in the
+# same parking session they are already in for consent or doi.
+fields:
+  tags:    { type: set, of: string, by: operator }
+  project: { type: string, by: operator }
+
+# --- rules — flow-level reactions, evaluated after EVERY appended entry -------
+# Stage handlers fire once, at their stage. Rules watch the projection for
+# the document's whole life — which matters precisely because the log stays
+# open. The one that exists exists because consent can be withdrawn after
+# completion, and a withdrawal that changes only a word in a YAML file is a
+# silent no-op on the one field where silence is unacceptable.
+rules:
+  - when: fields.consent == declined
+    do: retire                         # bundle moves to retired/<doc_id>/;
+                                       # the index tail drops its chunks; the
+                                       # catalogue row stays, marked retired.
+                                       # The log and custody chain remain
+                                       # intact — retirement is a move, not
+                                       # a deletion.
+
+# --- entrypoints — two dropboxes, one pipeline -------------------------------
+entrypoints:
+  - id: general
+    area: dropbox/general
+    pattern: "*"
+    fields: { visibility: general }
+  - id: private
+    area: dropbox/private
+    pattern: "*"
+    fields: { visibility: private }
+
+# --- areas — the pair physically moves; location is status -------------------
+# The sidecar's `status:` field is DERIVED from location; the engine moves
+# and writes atomically, so the two never disagree.
+areas:
+  inbox:      inbox/                   # assert files awaiting the engine
+  working:    working/<stage>/
+  failed:     failed/<stage>/          # failed/inbox/ holds rejected asserts
+  quarantine: quarantine/
+  corpus:     corpus/<doc_id>/
+  retired:    retired/<doc_id>/        # withdrawn from the corpus, custody
+                                       # preserved
+
+# --- artifacts ----------------------------------------------------------------
+artifacts:
+  meta:       { keep: true, to: bundle }
+  transcript: { keep: true, to: bundle }
+  chunks:     { keep: true, to: bundle }
+  original:   { keep: true, to: bundle }
+  # alternatives:
+  #   original: { keep: true, to: store.archive }
+  #   original: { keep: false }    # discarded only AFTER the transcript is
+  #                                # confirmed written
+  #
+  # Intermediates: when a stage REWRITES an artifact (anonymize rewrites the
+  # transcript), the engine deletes the superseded bytes on stage completion.
+  # The hash chain records that the earlier version existed; the disk does
+  # not keep it. For private documents this is the point.
+
+# --- pipeline -------------------------------------------------------------------
+pipeline:
+
+  - id: stamp
+    uses: engine.stamp                 # creates the sidecar; intrinsic fields
+                                       # (hash, mime, size, EXIF, duration,
+                                       # pages, …) are the ONE open set —
+                                       # never declared, shown in the
+                                       # catalogue's detail view. `received`
+                                       # (stage zero) records the as-dropped
+                                       # hash, anchoring the custody chain.
+
+  - id: scan
+    uses: local.clamscan
+    fields:
+      scan: { type: enum, values: [clean, infected], by: model }
+    on_infected: quarantine
+
+  - id: normalize
+    uses:
+      dispatch_on: mime
+      routes:
+        application/pdf: local.markitdown
+        text/markdown:   engine.passthrough
+        text/plain:      engine.wrap-md
+        audio/*:         local.whisper
+        image/*:         local.tesseract
+        # no route for the mime → fail (default), failed/normalize/
+    artifact: transcript
+    fields:
+      language: { type: string, by: model }
+
+  - id: strip-media
+    uses: engine.strip-media
+    artifact: transcript        # drop embedded base64 data: media before chunking
+
+  - id: anonymize
+    when: fields.visibility == private
+    uses: local.anonymize
+    with: { mode: redact }
+    artifact: transcript               # failure fails CLOSED (default
+                                       # handler): the pair stops in
+                                       # failed/anonymize/, nothing continues
+                                       # un-anonymized; repair, then --restart
+
+  - id: classify
+    uses: local.qwen3-9b
+    when: fields.scan == clean         # sits after anonymize → never sees PII
+    with:
+      # The prompt lives HERE, next to the contract it serves. ${...}
+      # placeholders resolve from this stage's own declarations, and the
+      # engine APPENDS the output contract derived from `fields:`. Edit the
+      # enum and the prompt follows. The resolved prompt's hash lands in the
+      # log entry (custody: prompted with what).
+      prompt: |
+        You are classifying a document for a research corpus.
+        Read the transcript and determine its doc_type.
+
+        Rules:
+        - choose exactly one value from: ${fields.doc_type.values}
+        - judge by content and form, not by filename
+        - if no value genuinely fits, answer "other" — do not force a fit
+
+        Transcript:
+        ${artifact.transcript}
+    fields:
+      doc_type:
+        type: enum                     # THE vocabulary, declared once —
+        values: [interview, workshop, application, research-doc, other]
+        by: [model, operator]          # prompt, dropdown, catalogue column
+        confidence_min: 0.8            # all read it from here. Below the
+                                       # gate, or `other` → proposed + park
+
+  - id: chunk
+    uses: engine.chunk-ast             # structural boundaries only — AST
+    with:                              # nodes, embedder-agnostic. Chunking
+      target_size: 512                 # is custody (frozen in the bundle);
+      max_size: 1024                   # embedding is a rebuildable tail. If
+    artifact: chunks                   # an embedder ever needs its own
+                                       # chunking, that belongs in the tail,
+                                       # not here.
+
+  - id: datasheet                      # type-conditional characterization —
+    when: fields.doc_type == research-doc        # last on purpose: a parked
+    uses: local.qwen3-9b               # datasheet blocks only completion,
+    with:                              # never transcription or chunking.
+      prompt: |                        # working/datasheet/ is the queue.
+        Extract bibliographic facts from this research document.
+        Report only what the text itself states; leave out anything
+        you cannot read directly from it. Separately, suggest topical
+        tags for the corpus catalogue.
+
+        Transcript:
+        ${artifact.transcript}
+    fields:
+      authors:  { type: set, of: string, by: model, confidence_min: 0.8 }
+      year:     { type: number, by: model, confidence_min: 0.8 }
+      venue:    { type: string, by: model, confidence_min: 0.8 }
+      abstract: { type: string, by: model }
+      doi:      { type: string, by: operator }
+      # doi is operator-only on purpose: models invent identifiers, and a
+      # wrong DOI is worse than a missing one.
+    proposes: [tags]                   # the operator is parked here anyway
+                                       # (doi) — confirming tags costs one
+                                       # glance in the same session
+
+  - id: datasheet                      # same stage id, different branch
+    when: fields.doc_type == interview
+    uses: local.qwen3-9b
+    with:
+      prompt: |
+        Read this interview transcript. List the participants as they
+        identify themselves or are addressed, and write a two-sentence
+        summary of what the conversation covers. Separately, suggest
+        topical tags for the corpus catalogue.
+
+        Transcript:
+        ${artifact.transcript}
+    fields:
+      participants: { type: set, of: string, by: model, confidence_min: 0.8 }
+      summary:      { type: string, by: model }
+      consent:                         # never inferred — a model reading a
+        type: enum                     # transcript cannot know what was
+        values: [given, pending, declined]
+        by: operator                   # agreed off the record
+    proposes: [tags]
+
+  - id: datasheet                      # the thin branch: every remaining
+    when: fields.doc_type in [workshop, application, other]
+    uses: local.qwen3-9b               # type still gets a summary and a tag
+    with:                              # proposal. Nothing here parks — the
+      prompt: |                        # document completes, the proposal
+        Read this document and write a two-sentence summary of what it
+        contains. Separately, suggest topical tags for the corpus
+        catalogue.
+
+        Transcript:
+        ${artifact.transcript}
+    fields:
+      summary: { type: string, by: model }
+    proposes: [tags]                   # waits in the catalogue's soft queue.
+                                       # Tags never gate completion — the
+                                       # corpus should not wait on curation,
+                                       # but curation should never start
+                                       # from a blank cell either.
+
+# ------------------------------------------------------------------------------
+# Custody invariant, per artifact: each entry's input hash for an artifact
+# equals the output hash of the latest prior entry that produced that
+# artifact. received anchors original; original → transcript → chunks is
+# mechanically verifiable with no notion of "relevance"; skip entries keep
+# the sequence gap-free.
+#
+# On completion: corpus/<doc_id>/{ <original>, transcript.md, chunks.jsonl,
+# meta.yaml }. Refs inside the bundle are relative and cannot break; anything
+# sent to a store.* resolves through the meta manifest.
+#
+# Tasks are not a system, they are a listing: every meta file under
+# working/, failed/, quarantine/ is a hard task and its `parked:` block is
+# the checklist; completed rows with empty operator cells or unconfirmed
+# proposals are the soft queue, computed from the projection. Completing a
+# task IS dropping an assert in inbox/. Nothing else to build.
+#
+# Edit policy: everything is read-only. New facts — model or human — arrive
+# as new entries, never as edits. The inbox is the only human write path;
+# the engine is the only writer of meta files; the catalogue is the editing
+# surface; the sidecar is the record.
+# ------------------------------------------------------------------------------

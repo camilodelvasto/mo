@@ -1,0 +1,55 @@
+name: grove
+version: 0.1.0
+type: renderer
+description: Collection shape. Assembles leaf posts into a navigable, deployable static site.
+
+capabilities:
+  render:
+    - type: grove
+    - type: collection
+  build:
+    - format: static
+      adapter: exporters/build.py
+    - format: static-encrypted
+      adapter: exporters/build.py
+      key_derivation: bip39
+  init:
+    - adapter: exporters/init_post.py
+  deploy:
+    - adapter: hetzner
+    - adapter: codeberg-pages
+    - adapter: s3
+    - adapter: github-pages
+
+schemas:
+  extends: [bite.v1.json, post.v1.json]
+  defines: [grove.v1.json, collection.v1.json, page.v1.json]
+  deposits_to: content/schema/
+
+themes:
+  shape_themes: themes/
+
+permissions:
+  filesystem:
+    read: [content/, shapes/leaf/]
+    write: [shapes/grove/.rendered/, .corpus/shapes/grove/]
+  network: none
+  subprocess: none
+
+dependencies:
+  python:
+    core:
+      - pyyaml>=6.0
+      - jsonschema>=4.0
+      - markdown-it-py>=3.0
+      - pygments>=2.0
+    build.encrypted:
+      - cryptography>=41.0
+      - mnemonic>=0.20
+    import_map:
+      pyyaml: yaml
+      markdown-it-py: markdown_it
+
+state_dir: .corpus/shapes/grove/
+
+sample: preview/post-example.md

@@ -1,0 +1,11 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "deck.config.schema.json",
+  "title": "Deck Shape Configuration",
+  "type": "object",
+  "properties": {
+    "default_theme": { "type": "string" },
+    "default_reveal_type": { "type": "string", "enum": ["fade", "slide", "rise", "none"] },
+    "default_reveal_speed": { "type": "number", "minimum": 0.1, "maximum": 5 }
+  }
+}

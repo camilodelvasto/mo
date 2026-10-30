@@ -1,0 +1,26 @@
+content/
+infrastructure/
+secrets/
+.corpus/
+capabilities.yaml
+attest.secret
+*.sqlite
+__pycache__/
+*.pyc
+.rendered/
+*.egg-info/
+.eggs/
+dist/
+build/
+.venv/
+.pytest_cache/
+
+# per-machine corpus lock files
+*.lock
+infrastructure/corpus-server/dev/
+infrastructure/corpus-server/.env
+infrastructure/corpus-server/gate.yaml
+caddy-access.log
+
+# client-deployment tests — read gitignored content/ and infrastructure/, never ship
+tests/local/

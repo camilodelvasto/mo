@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "page.v1.json",
+  "title": "Moui Grove Page",
+  "type": "object",
+  "required": ["title"],
+  "properties": {
+    "title": { "type": "string", "minLength": 1 },
+    "layout": { "type": "string", "enum": ["landing", "minimal", "page", "article", "quote", "app"] },
+    "width": { "type": "string", "enum": ["content", "full"] },
+    "mount": { "type": "string", "enum": ["subtree"] },
+    "excerpt": { "type": "string" },
+    "discoverable": { "type": "boolean" },
+    "published": { "type": "boolean" },
+    "theme": { "type": "string" },
+    "og": { "type": "object" },
+    "egress": { "type": "object" },
+    "body": { "type": "array" }
+  }
+}

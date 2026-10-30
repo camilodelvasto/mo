@@ -1,0 +1,15 @@
+{
+  "v": 1,
+  "name": "moui-corpus",
+  "shapes": {
+    "leaf": { "shape": "leaf", "version": "1.0.0", "local": true },
+    "deck": { "shape": "deck", "version": "0.3.0", "local": true },
+    "grove": { "shape": "grove", "version": "0.1.0", "local": true },
+    "sheets": { "shape": "sheets", "version": "0.1.0", "local": true },
+    "corpus": { "shape": "corpus", "version": "0.1.0", "local": true },
+    "webapp": { "shape": "webapp", "version": "0.1.0", "local": true }
+  },
+  "inference": {
+    "default": { "backend": "ollama", "model": "qwen3:8b" }
+  }
+}

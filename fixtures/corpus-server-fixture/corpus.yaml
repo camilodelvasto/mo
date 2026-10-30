@@ -1,0 +1,3 @@
+id: corpus-server-fixture
+flow: ./flow.yaml
+ask: ./ask.yaml

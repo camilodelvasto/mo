@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "bindings.v1.json",
+  "title": "Moui Corpus TUI Keybinding",
+  "description": "One entry in a keymap (bindings.default.yaml or a per-corpus bindings.yaml). The renderer exposes named capabilities; this binds a single key + a footer label to one. Renderer config, not a pipeline data contract.",
+  "type": "object",
+  "required": ["capability", "key", "label"],
+  "additionalProperties": false,
+  "properties": {
+    "capability": { "type": "string", "minLength": 1 },
+    "key": { "type": "string", "minLength": 1, "maxLength": 1 },
+    "args": { "type": "object" },
+    "label": { "type": "string", "minLength": 1 }
+  }
+}

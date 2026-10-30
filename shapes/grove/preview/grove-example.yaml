@@ -1,0 +1,31 @@
+id: example-grove
+title: "Example Grove"
+description: "A sample grove for validation and testing."
+lang: en
+
+defaults:
+  view: grid
+  layout: article
+  posts_per_page: 12
+
+og:
+  title: "Example Grove"
+  description: "A sample grove."
+  image: assets/og-default.png
+
+components:
+  header: true
+  footer: true
+  sidebar: false
+  search: true
+
+rss:
+  enabled: true
+  max_items: 20
+
+theme:
+  default: system
+  user_toggle: true
+
+offline:
+  enabled: true

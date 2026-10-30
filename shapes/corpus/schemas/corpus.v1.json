@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "corpus.v1.json",
+  "title": "Moui Corpus",
+  "type": "object",
+  "required": ["id", "flow"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "flow": { "type": "string", "minLength": 1,
+      "description": "Path to the flow contract, relative to this file." },
+    "ask": { "type": "string", "minLength": 1,
+      "description": "Path to the access contract (ask.yaml), relative to this file. Optional; read by the corpus access engine, ignored by the prep engine." },
+    "queries": { "type": "string", "minLength": 1,
+      "description": "Path to the saved-queries folder, relative to this file. Conventional value \"./queries\". Optional; required by `mo corpus query save|list`, which throw if it is absent." }
+  }
+}

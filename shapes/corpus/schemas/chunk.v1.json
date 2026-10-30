@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "chunk.v1.json",
+  "title": "Moui Corpus Chunk Record",
+  "description": "One record in chunks.jsonl. `text` is authoritative: it is what the embedder embeds and what a citation quotes. `span` is a locator into the transcript; when `contiguous` is true the invariant transcript[span] == text holds. `ref` is a short content hash of ast_path + normalized text — deterministic and stable across reprocess, NEVER a sequential counter (a counter would reassign refs on every re-chunk and invalidate every index key and citation). Refs are UNIQUE within one document — downstream keys by ref — so a repeated identical block under the same section salts its occurrence ordinal into the hash; occurrence order follows the transcript, keeping repeats stable too.",
+  "type": "object",
+  "required": ["ref", "ast_path", "span", "contiguous", "text"],
+  "additionalProperties": false,
+  "properties": {
+    "ref": {
+      "type": "string",
+      "pattern": "^c[0-9a-f]{8}$",
+      "description": "'c' + first 8 hex of sha256(ast_path + '\\x00' + normalized_text), with '\\x00' + occurrence ordinal appended for the second and later identical blocks in a document."
+    },
+    "ast_path": {
+      "type": "string",
+      "description": "Heading hierarchy of the source section, joined by ' > '. Empty string for content above the first heading."
+    },
+    "span": {
+      "type": "array",
+      "items": { "type": "integer", "minimum": 0 },
+      "minItems": 2,
+      "maxItems": 2,
+      "description": "[start_char, end_char) into the transcript, in characters."
+    },
+    "contiguous": {
+      "type": "boolean",
+      "description": "True when text == transcript[span] byte-for-byte. This chunker only joins consecutive blocks, so it is ALWAYS true; the false branch is dead by design — kept so a future chunker that assembles text across a structural gap can mark itself honestly, at which point span is the enclosing range and a renderer must not claim byte-exact highlighting."
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The authoritative chunk text — the exact source slice transcript[span] that the embedder embeds and a citation quotes. Never empty."
+    }
+  }
+}

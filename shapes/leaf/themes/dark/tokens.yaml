@@ -1,0 +1,19 @@
+# Leaf dark theme
+colors:
+  primary: "#e0e0e0"
+  background: "#1a1a2e"
+  text: "#d0d0d0"
+  accent: "#66aaff"
+  border: "#333355"
+
+typography:
+  heading: "'Georgia', serif"
+  body: "'system-ui', sans-serif"
+  mono: "'Menlo', monospace"
+  base_size: "18px"
+  line_height: 1.6
+  heading_weight: 700
+
+spacing:
+  content_width: "680px"
+  padding: "2rem"
